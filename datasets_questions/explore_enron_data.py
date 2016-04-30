@@ -16,7 +16,19 @@
 """
 
 import pickle
+import pandas
 
 enron_data = pickle.load(open("../final_project/final_project_dataset.pkl", "r"))
 
+frame = pandas.DataFrame.from_dict(enron_data, 'index')
+sum(frame.poi)
 
+idx = frame.index.str.startswith('PRENTICE')
+frame.loc[idx,:]
+
+idx = frame.index.str.startswith('COLWELL')
+frame.loc[idx,:]
+
+frame.sort('total_payments').total_payments
+
+sum(frame.salary <> 'NaN')

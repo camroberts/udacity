@@ -35,9 +35,17 @@ features_test  = vectorizer.transform(features_test).toarray()
 features_train = features_train[:150].toarray()
 labels_train   = labels_train[:150]
 
-
-
 ### your code goes here
+from sklearn import tree
+classifier = tree.DecisionTreeClassifier()
+classifier = classifier.fit(features_train, labels_train)
+acc = classifier.score(features_test, labels_test)
+print acc
+
+imp = classifier.feature_importances_
+print max(imp)
+idx = imp == max(imp)
+print idx.nonzero()
 
 
 
