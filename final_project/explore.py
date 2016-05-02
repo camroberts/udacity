@@ -62,33 +62,28 @@ labels, features = targetFeatureSplit(data)
 labels = np.array(labels)
 features = np.array(features)
 	
-# Have a try with select k best
-from sklearn.feature_selection import SelectKBest
-sel = SelectKBest(k=5)
-sel.fit_transform(features, labels)
-print [features_list[i+1] for i in sel.get_support(True)]
-# But how do I justify k?
-
 # Remove low importance features based on initial decision tree
 #features_list = ['poi', 'shared_receipt_with_poi', 'salary', 
 #'exercised_stock_options', 'bonus']
-from sklearn.feature_selection import SelectFromModel
+
+# Create a pipeline to do feature selection and param search
+from sklearn.feature_selection import SelectKBest
 from sklearn.pipeline import Pipeline
 from sklearn import tree
 dt = tree.DecisionTreeClassifier()
+sel = SelectKBest()
 clf = Pipeline([
 	('selection', sel),
 	('tree', dt)
 	])
 
 # Param grid
-param_grid = [
-	{'tree__criterion': ['gini', 'entropy'], 
+param_grid = [{
+	'selection__k': np.arange(1,6),
+	'tree__criterion': ['gini', 'entropy'], 
 	'tree__splitter': ['best', 'random'],
-	'tree__max_features': np.arange(2,6),
 	'tree__max_depth': np.arange(2,11)
-	}
-]
+	}]
 
 # Find best params using entire data set since it is small
 from sklearn.grid_search import GridSearchCV
@@ -96,7 +91,7 @@ from sklearn.cross_validation import StratifiedShuffleSplit
 folds = 10
 cv = StratifiedShuffleSplit(labels, folds, random_state = 43)
 # Make sure to use different seed to tester
-clf = GridSearchCV(clf, param_grid, scoring = 'f1', cv=cv)
+clf = GridSearchCV(clf, param_grid, scoring='f1', cv=cv)
 clf = clf.fit(features, labels)
 print clf.best_score_
 print clf.best_params_
