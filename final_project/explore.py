@@ -89,43 +89,46 @@ features_list = ['poi', 'shared_receipt_with_poi', 'salary',
 param_grid = [
 	{'criterion': ['gini', 'entropy'], 
 	'splitter': ['best', 'random'],
-	'max_features': [2, 3, 4],
-	'max_depth': [4, 5, 6]
+	'max_features': np.arange(2,5),
+	'max_depth': np.arange(2,11)
 	}
 ]
 
-# Do K-folds
+# Find best params using entire data set since it is small
 from sklearn.grid_search import GridSearchCV
 from sklearn import tree
 from sklearn.cross_validation import StratifiedShuffleSplit
-from sklearn.metrics import classification_report
-from sklearn.metrics import recall_score, precision_score, f1_score
-
 folds = 100
 cv = StratifiedShuffleSplit(labels, folds, random_state = 42)
-score_train = []
-score_test = []
+clf = GridSearchCV(tree.DecisionTreeClassifier(), param_grid, scoring = 'f1', cv=cv)
+clf = clf.fit(features, labels)
+print clf.best_score_
+print clf.best_params_
+clf = clf.best_estimator_
+
+# Do K-folds on train/test to assess performance 
+from sklearn.cross_validation import StratifiedShuffleSplit
+from sklearn.metrics import classification_report
+from sklearn.metrics import recall_score, precision_score, f1_score
+#folds = 10
+#cv = StratifiedShuffleSplit(labels, folds, random_state = 42)
+f1 = []
+precision = []
+recall = []
 for train_idx, test_idx in cv:
 	features_train, features_test = features[train_idx], features[test_idx]
 	labels_train, labels_test = labels[train_idx], labels[test_idx]
 
-	# Find best params
-	clf = GridSearchCV(tree.DecisionTreeClassifier(), param_grid, scoring = 'f1')
 	clf = clf.fit(features_train, labels_train)
-	pred = clf.predict(features_test)
-	score_train.append(clf.best_score_)
-	score_test.append(f1_score(labels_test, pred))
-	print clf.best_params_
-	print clf.best_score_
-	print classification_report(labels_test, pred)
 
-# Visualise
-#from sklearn.externals.six import StringIO
-#import pydot 
-#dot_data = StringIO() 
-#tree.export_graphviz(clf, out_file=dot_data) 
-#graph = pydot.graph_from_dot_data(dot_data.getvalue()) 
-#graph.write_pdf("tree.pdf")
+	# Evaluate using f1 (which combines precision and recall)
+	# precision = of those we identified as POIs how many are
+	# recall = of all POIs how many did we identify
+	pred = clf.predict(features_test)
+	f1.append(f1_score(labels_test, pred))
+	precision.append(precision_score(labels_test, pred))
+	recall.append(recall_score(labels_test, pred))
+	#print classification_report(labels_test, pred)
 
 # Have a look at features importances
 #zip(features_list[1:], clf.feature_importances_)
@@ -135,13 +138,10 @@ for train_idx, test_idx in cv:
 # exercised_stock_options
 # bonus
 
-# Evaluate using f1 (which combines precision and recall)
-# precision = of those we identified as POIs how many are
-# recall = of all POIs how many did we identify
+print 'avg recall = ' + repr(np.mean(recall))
+print 'avg precision = ' + repr(np.mean(precision))
+print 'avg f1 = ' + repr(np.mean(f1))
 
-recall = recall_score(labels_test, pred)
-precision = precision_score(labels_test, pred)
-f1 = f1_score(labels_test, pred)
-print 'recall = ' + repr(recall)
-print 'precision = ' + repr(precision)
-print 'f1 = ' + repr(f1)
+# Now use udacity tester to evaulate using train/test split
+from tester import test_classifier
+test_classifier(clf, data_dict, features_list)
