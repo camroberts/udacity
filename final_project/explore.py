@@ -51,10 +51,8 @@ diff.sort_values()
 from sklearn.decomposition import PCA
 fin_features_list = ['salary', 'exercised_stock_options', 'bonus', 'restricted_stock',
 	'expenses', 'other']
-#fin_features_idx = [i for i, j in enumerate(features_list[1:]) if j in fin_features_list]
 email_features_list = ['to_messages', 'shared_receipt_with_poi', 'from_messages',
 	'from_this_person_to_poi', 'from_poi_to_this_person']
-#email_features_idx = [i for i, j in enumerate(features_list[1:]) if j in email_features_list]
 
 # Need to replace NaN with zero first and rescale
 frame = frame.fillna(0)
@@ -70,6 +68,7 @@ email_features = preprocessing.scale(frame[email_features_list])
 frame['email_pc'] = pca.fit_transform(email_features)
 print 'explained var ratio (email) = ' + repr(pca.explained_variance_ratio_)
 
+# We've added these to the original features so k-best can select from all
 features_list = features_list + ['fin_pc', 'email_pc']
 
 # Convert frame back to data_dict
@@ -81,29 +80,25 @@ labels, features = targetFeatureSplit(data)
 labels = np.array(labels)
 features = np.array(features)
 
-# Remove low importance features based on initial decision tree
-#features_list = ['poi', 'shared_receipt_with_poi', 'salary', 
-#'exercised_stock_options', 'bonus']
-
 # Create a pipeline to do PCA, feature selection and param search
 from sklearn.pipeline import Pipeline, FeatureUnion
 from sklearn.feature_selection import SelectKBest
 from sklearn import tree
 
-clf = Pipeline([('sel', SelectKBest()), ('tree', tree.DecisionTreeClassifier())])
+clf = Pipeline([('sel', SelectKBest()), ('tree', tree.DecisionTreeClassifier(presort=True))])
 
 # Param grid
 param_grid = [{
 	'sel__k': np.arange(1,6),
 	'tree__criterion': ['gini', 'entropy'], 
 	'tree__splitter': ['best', 'random'],
-	'tree__max_depth': np.arange(1,11)
+	'tree__max_depth': np.arange(1,21)
 	}]
 
 # Find best params using entire data set since it is small
 from sklearn.grid_search import GridSearchCV
 from sklearn.cross_validation import StratifiedShuffleSplit
-folds = 100
+folds = 10
 cv = StratifiedShuffleSplit(labels, folds, random_state = 43)
 # Make sure to use different seed to tester
 clf = GridSearchCV(clf, param_grid, scoring='f1', cv=cv)
@@ -135,14 +130,6 @@ for train_idx, test_idx in cv:
 	precision.append(precision_score(labels_test, pred))
 	recall.append(recall_score(labels_test, pred))
 	#print classification_report(labels_test, pred)
-
-# Have a look at features importances
-#zip(features_list[1:], clf.feature_importances_)
-# It looks like the most important are
-# shared_receipt_with_poi
-# salary
-# exercised_stock_options
-# bonus
 
 print 'avg recall = ' + repr(np.mean(recall))
 print 'avg precision = ' + repr(np.mean(precision))
