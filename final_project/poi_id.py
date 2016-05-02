@@ -29,16 +29,16 @@ frame = frame[~remove]
 
 
 ### Task 1: Select what features you'll use.
-# Remove email address as it is just a label
+# Remove email address as it is just an identifier
 frame = frame.drop('email_address', axis=1)
 
 # Also remove the total features as these are the sum of parts and thus contain 
 # redundant information
 frame = frame.drop(['total_payments', 'total_stock_value'], axis=1)
 
-# Remove some features which clearly do not have enough data
+# Remove features which have less than 50% coverage
 valueCount = frame.count()
-remove = valueCount[valueCount < 70].keys().tolist()
+remove = valueCount[valueCount < len(frame)*.5].keys().tolist()
 frame = frame.drop(remove, axis=1)
 
 # Start with all remaining features (poi first)
@@ -54,7 +54,7 @@ frame = frame.fillna(0)
 ### Task 3: Create new feature(s)
 # Try PCA on the two types of feature: financial and email
 # I think it makes sense that these two "larger dimensions" could be represented
-# by one principle component
+# by one principle component each
 from sklearn.decomposition import PCA
 from sklearn import preprocessing
 
@@ -122,7 +122,7 @@ wgts = [
 # I'd like to know more about these weights. How are they used? What constraints do
 # they have?
 param_grid = [{
-	'sel__k': np.arange(1,6),
+	'sel__k': np.arange(1, len(features_list)),
 	'boost__n_estimators': [1,2,3],
 	'boost__base_estimator__criterion': ['gini', 'entropy'], 
 	'boost__base_estimator__max_depth': np.arange(1,21),
@@ -131,6 +131,8 @@ param_grid = [{
 
 # Find best params using CV on entire data set since it is small
 # (Testing is done by partition into train/test)
+# We score using F1 since this is the harmonic mean of recall and precision the
+# two main criteria for this exercise.
 from sklearn.grid_search import GridSearchCV
 from sklearn.cross_validation import StratifiedShuffleSplit
 
@@ -149,4 +151,6 @@ print clf.best_params_
 clf = clf.best_estimator_
 sel = clf.named_steps['sel']
 features_list = ['poi'] + [features_list[i+1] for i in sel.get_support(True)]
+scores = sel.scores_[sel.get_support()]
+
 dump_classifier_and_data(clf, data_dict, features_list)
