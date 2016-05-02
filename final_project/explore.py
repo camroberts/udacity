@@ -73,19 +73,46 @@ sel.fit_transform(features, labels)
 print [features_list[i+1] for i in sel.get_support(True)]
 # But how do I justify k?
 
+# Remove low importance features based on initial decision tree
+features_list = ['poi', 'shared_receipt_with_poi', 'salary', 
+'exercised_stock_options', 'bonus']
+
 # Split into train and test
 from sklearn.cross_validation import train_test_split
 features_train, features_test, labels_train, labels_test = train_test_split(
 	features, labels, test_size=0.3, random_state=42)
 
 # Try a decision tree
+# Param grid
+param_grid = [
+	{'criterion': ['gini', 'entropy'], 
+	'splitter': ['best', 'random'],
+	'max_features': [2, 3, 4],
+	'max_depth': [4, 5, 6]
+	}
+]
+
+# Find best params
+from sklearn.grid_search import GridSearchCV
 from sklearn import tree
-clf = tree.DecisionTreeClassifier()
+clf = GridSearchCV(tree.DecisionTreeClassifier(), param_grid, scoring = 'f1')
 clf = clf.fit(features_train, labels_train)
+print clf.best_params_
 pred = clf.predict(features_test)
 
+from sklearn.metrics import classification_report
+print classification_report(labels_test, pred)
+
+# Visualise
+#from sklearn.externals.six import StringIO
+#import pydot 
+#dot_data = StringIO() 
+#tree.export_graphviz(clf, out_file=dot_data) 
+#graph = pydot.graph_from_dot_data(dot_data.getvalue()) 
+#graph.write_pdf("tree.pdf")
+
 # Have a look at features importances
-zip(features_list[1:], clf.feature_importances_)
+#zip(features_list[1:], clf.feature_importances_)
 # It looks like the most important are
 # shared_receipt_with_poi
 # salary
