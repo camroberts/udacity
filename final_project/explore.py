@@ -14,6 +14,13 @@ frame = pd.DataFrame.from_dict(data_dict, 'index')
 frame = frame.replace('NaN', np.NaN)
 # Do we want to replace NaN with zero?
 
+# Remove total oulier
+frame = frame.drop('TOTAL')
+
+# Actually maybe we should remove people with no total payment or stock value
+remove = frame.total_payments.isnull() & frame.total_stock_value.isnull()
+frame = frame[~remove]
+
 # Start with all features
 features_list = frame.columns.tolist()
 features_list.remove('poi')
@@ -23,37 +30,46 @@ features_list.insert(0, 'poi')
 features_list.remove('email_address')
 frame = frame.drop('email_address', axis=1)
 
+# Also remove total features as these are the sum of parts and thus contain same
+# information
+features_list.remove('total_payments')
+features_list.remove('total_stock_value')
+frame = frame.drop(['total_payments', 'total_stock_value'], axis=1)
+
 # Remove some features which clearly do not have enough data
 valueCount = frame.count()
 remove = valueCount[valueCount < 70].keys().tolist()
 features_list = [f for f in features_list if f not in remove]
 frame = frame.drop(remove, axis=1)
 
-# total payments vs total stock value
-# This quickly shows the TOTAL outlier we will remove
-import matplotlib.pyplot as plt
-plt.plot(frame.total_payments[frame.poi], frame.total_stock_value[frame.poi], 'r.',
-	frame.total_payments[~frame.poi], frame.total_stock_value[~frame.poi], 'b.')
-#plt.show()
-
-# Remove total oulier
-frame = frame.drop('TOTAL')
-
 # Have a look at features grouped by poi
 avg = frame.groupby('poi').mean()
 diff = abs((avg.loc[True] - avg.loc[False])/avg.loc[True])
 diff.sort_values()
-	
-# Some employees have little data
-valueCount = frame.count(axis=1)
-valueCount[valueCount<5]
 
-# Actually maybe we should remove people with no total payment or stock value
-remove = frame.total_payments.isnull() & frame.total_stock_value.isnull()
-frame = frame[~remove]
+# Try PCA on the two types of feature: financial and email
+from sklearn.decomposition import PCA
+fin_features_list = ['salary', 'exercised_stock_options', 'bonus', 'restricted_stock',
+	'expenses', 'other']
+#fin_features_idx = [i for i, j in enumerate(features_list[1:]) if j in fin_features_list]
+email_features_list = ['to_messages', 'shared_receipt_with_poi', 'from_messages',
+	'from_this_person_to_poi', 'from_poi_to_this_person']
+#email_features_idx = [i for i, j in enumerate(features_list[1:]) if j in email_features_list]
 
-# Convert frame back to data_dict (replace NaN with zero first)
+# Need to replace NaN with zero first
 frame = frame.fillna(0)
+
+pca = PCA(1)
+frame['fin_pc'] = pca.fit_transform(frame[fin_features_list])
+print 'explained var ratio (fin) = ' + repr(pca.explained_variance_ratio_)
+	
+pca = PCA(1)
+frame['email_pc'] = pca.fit_transform(frame[email_features_list])
+print 'explained var ratio (email) = ' + repr(pca.explained_variance_ratio_)
+
+features_list = features_list + ['fin_pc', 'email_pc']
+
+# Convert frame back to data_dict
 data_dict = frame.T.to_dict()
 
 ### Extract features and labels from dataset for local testing
@@ -61,28 +77,24 @@ data = featureFormat(data_dict, features_list, sort_keys = True)
 labels, features = targetFeatureSplit(data)
 labels = np.array(labels)
 features = np.array(features)
-	
+
 # Remove low importance features based on initial decision tree
 #features_list = ['poi', 'shared_receipt_with_poi', 'salary', 
 #'exercised_stock_options', 'bonus']
 
-# Create a pipeline to do feature selection and param search
+# Create a pipeline to do PCA, feature selection and param search
+from sklearn.pipeline import Pipeline, FeatureUnion
 from sklearn.feature_selection import SelectKBest
-from sklearn.pipeline import Pipeline
 from sklearn import tree
-dt = tree.DecisionTreeClassifier()
-sel = SelectKBest()
-clf = Pipeline([
-	('selection', sel),
-	('tree', dt)
-	])
+
+clf = Pipeline([('sel', SelectKBest()), ('tree', tree.DecisionTreeClassifier())])
 
 # Param grid
 param_grid = [{
-	'selection__k': np.arange(1,6),
+	'sel__k': np.arange(1,6),
 	'tree__criterion': ['gini', 'entropy'], 
 	'tree__splitter': ['best', 'random'],
-	'tree__max_depth': np.arange(2,11)
+	'tree__max_depth': np.arange(1,11)
 	}]
 
 # Find best params using entire data set since it is small
@@ -93,7 +105,7 @@ cv = StratifiedShuffleSplit(labels, folds, random_state = 43)
 # Make sure to use different seed to tester
 clf = GridSearchCV(clf, param_grid, scoring='f1', cv=cv)
 clf = clf.fit(features, labels)
-print clf.best_score_
+print 'best score = ' + repr(clf.best_score_)
 print clf.best_params_
 clf = clf.best_estimator_
 
