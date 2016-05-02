@@ -82,18 +82,19 @@ labels = np.array(labels)
 features = np.array(features)
 
 # Create a pipeline to do PCA, feature selection and param search
-from sklearn.pipeline import Pipeline, FeatureUnion
 from sklearn.feature_selection import SelectKBest
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import AdaBoostClassifier
+from sklearn.tree import DecisionTreeClassifier
 
-clf = Pipeline([('sel', SelectKBest()), ('tree', RandomForestClassifier())])
+boost = AdaBoostClassifier(DecisionTreeClassifier())
+clf = Pipeline([('sel', SelectKBest()), ('boost', boost)])
 
 # Param grid
 param_grid = [{
 	'sel__k': np.arange(1,6),
-	'tree__criterion': ['gini', 'entropy'], 
-	#'tree__max_features': [None, 'auto'],
-	'tree__max_depth': np.arange(1,21)
+	'boost__n_estimators': [1,2],
+	'boost__base_estimator__criterion': ['gini', 'entropy'], 
+	'boost__base_estimator__max_depth': np.arange(1,21)
 	}]
 
 # Find best params using entire data set since it is small
@@ -105,37 +106,9 @@ cv = StratifiedShuffleSplit(labels, folds, random_state = 43)
 clf = GridSearchCV(clf, param_grid, scoring='f1', cv=cv)
 clf = clf.fit(features, labels)
 print 'best score = ' + repr(clf.best_score_)
+print 'best params:'
 print clf.best_params_
-clf = clf.best_estimator_
-
-# Do CV folds on train/test to assess performance 
-from sklearn.cross_validation import StratifiedShuffleSplit
-from sklearn.metrics import classification_report
-from sklearn.metrics import recall_score, precision_score, f1_score
-folds = 10
-cv = StratifiedShuffleSplit(labels, folds, random_state = 42)
-f1 = []
-precision = []
-recall = []
-for train_idx, test_idx in cv:
-	features_train, features_test = features[train_idx], features[test_idx]
-	labels_train, labels_test = labels[train_idx], labels[test_idx]
-
-	clf = clf.fit(features_train, labels_train)
-
-	# Evaluate using f1 (which combines precision and recall)
-	# precision = of those we identified as POIs how many are
-	# recall = of all POIs how many did we identify
-	pred = clf.predict(features_test)
-	f1.append(f1_score(labels_test, pred))
-	precision.append(precision_score(labels_test, pred))
-	recall.append(recall_score(labels_test, pred))
-	#print classification_report(labels_test, pred)
-
-print 'avg recall = ' + repr(np.mean(recall))
-print 'avg precision = ' + repr(np.mean(precision))
-print 'avg f1 = ' + repr(np.mean(f1))
 
 # Now use udacity tester to evaulate using train/test split
 from tester import test_classifier
-test_classifier(clf, data_dict, features_list)
+test_classifier(clf.best_estimator_, data_dict, features_list)
