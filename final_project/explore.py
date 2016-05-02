@@ -59,7 +59,9 @@ data_dict = frame.T.to_dict()
 ### Extract features and labels from dataset for local testing
 data = featureFormat(data_dict, features_list, sort_keys = True)
 labels, features = targetFeatureSplit(data)
-
+labels = np.array(labels)
+features = np.array(features)
+	
 # Remove features with low variance
 from sklearn.feature_selection import VarianceThreshold
 sel = VarianceThreshold(threshold=.8)
@@ -78,9 +80,9 @@ features_list = ['poi', 'shared_receipt_with_poi', 'salary',
 'exercised_stock_options', 'bonus']
 
 # Split into train and test
-from sklearn.cross_validation import train_test_split
-features_train, features_test, labels_train, labels_test = train_test_split(
-	features, labels, test_size=0.3, random_state=42)
+#from sklearn.cross_validation import train_test_split
+#features_train, features_test, labels_train, labels_test = train_test_split(
+#	features, labels, test_size=0.3, random_state=42)
 
 # Try a decision tree
 # Param grid
@@ -92,16 +94,30 @@ param_grid = [
 	}
 ]
 
-# Find best params
+# Do K-folds
 from sklearn.grid_search import GridSearchCV
 from sklearn import tree
-clf = GridSearchCV(tree.DecisionTreeClassifier(), param_grid, scoring = 'f1')
-clf = clf.fit(features_train, labels_train)
-print clf.best_params_
-pred = clf.predict(features_test)
-
+from sklearn.cross_validation import StratifiedShuffleSplit
 from sklearn.metrics import classification_report
-print classification_report(labels_test, pred)
+from sklearn.metrics import recall_score, precision_score, f1_score
+
+folds = 100
+cv = StratifiedShuffleSplit(labels, folds, random_state = 42)
+score_train = []
+score_test = []
+for train_idx, test_idx in cv:
+	features_train, features_test = features[train_idx], features[test_idx]
+	labels_train, labels_test = labels[train_idx], labels[test_idx]
+
+	# Find best params
+	clf = GridSearchCV(tree.DecisionTreeClassifier(), param_grid, scoring = 'f1')
+	clf = clf.fit(features_train, labels_train)
+	pred = clf.predict(features_test)
+	score_train.append(clf.best_score_)
+	score_test.append(f1_score(labels_test, pred))
+	print clf.best_params_
+	print clf.best_score_
+	print classification_report(labels_test, pred)
 
 # Visualise
 #from sklearn.externals.six import StringIO
@@ -122,7 +138,7 @@ print classification_report(labels_test, pred)
 # Evaluate using f1 (which combines precision and recall)
 # precision = of those we identified as POIs how many are
 # recall = of all POIs how many did we identify
-from sklearn.metrics import recall_score, precision_score, f1_score
+
 recall = recall_score(labels_test, pred)
 precision = precision_score(labels_test, pred)
 f1 = f1_score(labels_test, pred)
