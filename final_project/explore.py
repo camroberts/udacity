@@ -56,15 +56,18 @@ email_features_list = ['to_messages', 'shared_receipt_with_poi', 'from_messages'
 	'from_this_person_to_poi', 'from_poi_to_this_person']
 #email_features_idx = [i for i, j in enumerate(features_list[1:]) if j in email_features_list]
 
-# Need to replace NaN with zero first
+# Need to replace NaN with zero first and rescale
 frame = frame.fillna(0)
+from sklearn import preprocessing
 
 pca = PCA(1)
-frame['fin_pc'] = pca.fit_transform(frame[fin_features_list])
+fin_features = preprocessing.scale(frame[fin_features_list])
+frame['fin_pc'] = pca.fit_transform(fin_features)
 print 'explained var ratio (fin) = ' + repr(pca.explained_variance_ratio_)
 	
 pca = PCA(1)
-frame['email_pc'] = pca.fit_transform(frame[email_features_list])
+email_features = preprocessing.scale(frame[email_features_list])
+frame['email_pc'] = pca.fit_transform(email_features)
 print 'explained var ratio (email) = ' + repr(pca.explained_variance_ratio_)
 
 features_list = features_list + ['fin_pc', 'email_pc']
@@ -100,7 +103,7 @@ param_grid = [{
 # Find best params using entire data set since it is small
 from sklearn.grid_search import GridSearchCV
 from sklearn.cross_validation import StratifiedShuffleSplit
-folds = 10
+folds = 100
 cv = StratifiedShuffleSplit(labels, folds, random_state = 43)
 # Make sure to use different seed to tester
 clf = GridSearchCV(clf, param_grid, scoring='f1', cv=cv)
