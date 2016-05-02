@@ -42,6 +42,8 @@ remove = valueCount[valueCount < 70].keys().tolist()
 features_list = [f for f in features_list if f not in remove]
 frame = frame.drop(remove, axis=1)
 
+frame = frame.fillna(0)
+
 # Have a look at features grouped by poi
 avg = frame.groupby('poi').mean()
 diff = abs((avg.loc[True] - avg.loc[False])/avg.loc[True])
@@ -55,7 +57,6 @@ email_features_list = ['to_messages', 'shared_receipt_with_poi', 'from_messages'
 	'from_this_person_to_poi', 'from_poi_to_this_person']
 
 # Need to replace NaN with zero first and rescale
-frame = frame.fillna(0)
 from sklearn import preprocessing
 
 pca = PCA(1)
@@ -83,15 +84,15 @@ features = np.array(features)
 # Create a pipeline to do PCA, feature selection and param search
 from sklearn.pipeline import Pipeline, FeatureUnion
 from sklearn.feature_selection import SelectKBest
-from sklearn import tree
+from sklearn.ensemble import RandomForestClassifier
 
-clf = Pipeline([('sel', SelectKBest()), ('tree', tree.DecisionTreeClassifier(presort=True))])
+clf = Pipeline([('sel', SelectKBest()), ('tree', RandomForestClassifier())])
 
 # Param grid
 param_grid = [{
 	'sel__k': np.arange(1,6),
 	'tree__criterion': ['gini', 'entropy'], 
-	'tree__splitter': ['best', 'random'],
+	#'tree__max_features': [None, 'auto'],
 	'tree__max_depth': np.arange(1,21)
 	}]
 
