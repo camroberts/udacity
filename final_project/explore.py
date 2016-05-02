@@ -82,26 +82,33 @@ labels = np.array(labels)
 features = np.array(features)
 
 # Create a pipeline to do PCA, feature selection and param search
+from sklearn.pipeline import Pipeline
 from sklearn.feature_selection import SelectKBest
 from sklearn.ensemble import AdaBoostClassifier
 from sklearn.tree import DecisionTreeClassifier
 
-boost = AdaBoostClassifier(DecisionTreeClassifier())
+boost = AdaBoostClassifier(DecisionTreeClassifier(random_state=41), random_state=41)
 clf = Pipeline([('sel', SelectKBest()), ('boost', boost)])
 
 # Param grid
+wgts = [
+	{0: .2, 1: .8},
+	{0: .4, 1: .6},
+	{0: .6, 1: .4},
+	{0: .8, 1: .2}
+]
 param_grid = [{
 	'sel__k': np.arange(1,6),
-	'boost__n_estimators': [1,2],
+	'boost__n_estimators': [1,2,3],
 	'boost__base_estimator__criterion': ['gini', 'entropy'], 
-	'boost__base_estimator__max_depth': np.arange(1,21)
+	'boost__base_estimator__max_depth': np.arange(1,21),
+	'boost__base_estimator__class_weight': [None, 'balanced'] + wgts
 	}]
 
 # Find best params using entire data set since it is small
 from sklearn.grid_search import GridSearchCV
 from sklearn.cross_validation import StratifiedShuffleSplit
-folds = 10
-cv = StratifiedShuffleSplit(labels, folds, random_state = 43)
+cv = StratifiedShuffleSplit(labels, 10, random_state = 43)
 # Make sure to use different seed to tester
 clf = GridSearchCV(clf, param_grid, scoring='f1', cv=cv)
 clf = clf.fit(features, labels)
@@ -109,6 +116,9 @@ print 'best score = ' + repr(clf.best_score_)
 print 'best params:'
 print clf.best_params_
 
-# Now use udacity tester to evaulate using train/test split
+# Now use udacity tester to evaulate best model using train/test split
 from tester import test_classifier
-test_classifier(clf.best_estimator_, data_dict, features_list)
+clf = clf.best_estimator_
+sel = clf.named_steps['sel']
+features_list = ['poi'] + [features_list[i+1] for i in sel.get_support(True)]
+test_classifier(clf, data_dict, features_list)
