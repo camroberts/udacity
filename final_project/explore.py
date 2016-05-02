@@ -99,19 +99,20 @@ from sklearn.grid_search import GridSearchCV
 from sklearn import tree
 from sklearn.cross_validation import StratifiedShuffleSplit
 folds = 100
-cv = StratifiedShuffleSplit(labels, folds, random_state = 42)
+cv = StratifiedShuffleSplit(labels, folds, random_state = 43)
+# Make sure to use different seed to tester
 clf = GridSearchCV(tree.DecisionTreeClassifier(), param_grid, scoring = 'f1', cv=cv)
 clf = clf.fit(features, labels)
 print clf.best_score_
 print clf.best_params_
 clf = clf.best_estimator_
 
-# Do K-folds on train/test to assess performance 
+# Do CV folds on train/test to assess performance 
 from sklearn.cross_validation import StratifiedShuffleSplit
 from sklearn.metrics import classification_report
 from sklearn.metrics import recall_score, precision_score, f1_score
-#folds = 10
-#cv = StratifiedShuffleSplit(labels, folds, random_state = 42)
+folds = 10
+cv = StratifiedShuffleSplit(labels, folds, random_state = 42)
 f1 = []
 precision = []
 recall = []
