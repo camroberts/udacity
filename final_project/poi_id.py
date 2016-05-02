@@ -8,6 +8,92 @@ sys.path.append("../tools/")
 
 from feature_format import featureFormat, targetFeatureSplit
 from tester import dump_classifier_and_data
+from sklearn.pipeline import Pipeline
+from sklearn.feature_selection import SelectKBest
+
+
+def getDecisionTree(features_list):
+	# Create a pipeline to do feature selection and param search
+	from sklearn.tree import DecisionTreeClassifier
+
+	tree = DecisionTreeClassifier(random_state=41)
+	clf = Pipeline([('sel', SelectKBest()), ('tree', tree)])	
+
+	# Param grid
+	wgts = [
+		{0: .2, 1: .8},
+		{0: .4, 1: .6},
+		{0: .6, 1: .4},
+		{0: .8, 1: .2}
+	]
+	# I'd like to know more about these weights. How are they used? What constraints do
+	# they have?
+	param_grid = [{
+		'sel__k': np.arange(1, len(features_list)),
+		'tree__criterion': ['gini', 'entropy'], 
+		'tree__max_depth': np.arange(1,21),
+		'tree__class_weight': [None, 'balanced'] + wgts
+		}]
+
+	return clf, param_grid
+
+
+def getRandomForest(features_list):
+	# Create a pipeline to do feature selection and param search
+	from sklearn.ensemble import RandomForestClassifier
+
+	forest = RandomForestClassifier(random_state=41)
+	clf = Pipeline([('sel', SelectKBest()), ('forest', forest)])
+
+	# Param grid
+	wgts = [
+		{0: .2, 1: .8},
+		{0: .4, 1: .6},
+		{0: .6, 1: .4},
+		{0: .8, 1: .2}
+	]
+	# I'd like to know more about these weights. How are they used? What constraints do
+	# they have?
+	param_grid = [{
+		'sel__k': np.arange(1, len(features_list)),
+		'forest__n_estimators': [1,2,3],
+		'forest__criterion': ['gini', 'entropy'], 
+		'forest__max_depth': np.arange(1,21),
+		'forest__class_weight': [None, 'balanced'] + wgts
+		}]
+
+	return clf, param_grid
+
+
+def getAdaBoost(features_list):
+	# Create a pipeline to do feature selection and param search
+	from sklearn.ensemble import AdaBoostClassifier
+	from sklearn.tree import DecisionTreeClassifier
+
+	boost = AdaBoostClassifier(DecisionTreeClassifier(random_state=41), random_state=41)
+	clf = Pipeline([('sel', SelectKBest()), ('boost', boost)])
+
+	# Param grid
+	wgts = [
+		{0: .2, 1: .8},
+		{0: .4, 1: .6},
+		{0: .6, 1: .4},
+		{0: .8, 1: .2}
+	]
+	# I'd like to know more about these weights. How are they used? What constraints do
+	# they have?
+	param_grid = [{
+		'sel__k': np.arange(1, len(features_list)),
+		'boost__n_estimators': [1,2,3],
+		'boost__base_estimator__criterion': ['gini', 'entropy'], 
+		'boost__base_estimator__max_depth': np.arange(1,21),
+		'boost__base_estimator__class_weight': [None, 'balanced'] + wgts
+		}]
+
+	return clf, param_grid
+
+
+
 
 ### Load the dictionary containing the dataset
 with open("final_project_dataset.pkl", "r") as data_file:
@@ -20,7 +106,7 @@ frame = frame.replace('NaN', np.NaN)
 
 ### Task 2: Remove outliers
 # These outliers can be observed by inspecting the data manually
-# Remove TOTAL outlier
+# Remove TOTAL outliers
 frame = frame.drop('TOTAL')
 
 # Remove people with no total payment or stock value
@@ -93,17 +179,9 @@ features = np.array(features)
 ### you'll need to use Pipelines. For more info:
 ### http://scikit-learn.org/stable/modules/pipeline.html
 
-# Create a pipeline to do feature selection and param search
-from sklearn.pipeline import Pipeline
-from sklearn.feature_selection import SelectKBest
-from sklearn.ensemble import AdaBoostClassifier
-from sklearn.tree import DecisionTreeClassifier
-
-# I've used AdaBoost. I started with a plain DecisionTree but found Ada better.
-# I also experimented with RandomForests
-boost = AdaBoostClassifier(DecisionTreeClassifier(random_state=41), random_state=41)
-clf = Pipeline([('sel', SelectKBest()), ('boost', boost)])
-
+#clf, param_grid = getDecisionTree(features_list)
+#clf, param_grid = getRandomForest(features_list)
+clf, param_grid = getAdaBoost(features_list)
 
 ### Task 5: Tune your classifier to achieve better than .3 precision and recall 
 ### using our testing script. Check the tester.py script in the final project
@@ -111,23 +189,6 @@ clf = Pipeline([('sel', SelectKBest()), ('boost', boost)])
 ### function. Because of the small size of the dataset, the script uses
 ### stratified shuffle split cross validation. For more info: 
 ### http://scikit-learn.org/stable/modules/generated/sklearn.cross_validation.StratifiedShuffleSplit.html
-
-# Param grid
-wgts = [
-	{0: .2, 1: .8},
-	{0: .4, 1: .6},
-	{0: .6, 1: .4},
-	{0: .8, 1: .2}
-]
-# I'd like to know more about these weights. How are they used? What constraints do
-# they have?
-param_grid = [{
-	'sel__k': np.arange(1, len(features_list)),
-	'boost__n_estimators': [1,2,3],
-	'boost__base_estimator__criterion': ['gini', 'entropy'], 
-	'boost__base_estimator__max_depth': np.arange(1,21),
-	'boost__base_estimator__class_weight': [None, 'balanced'] + wgts
-	}]
 
 # Find best params using CV on entire data set since it is small
 # (Testing is done by partition into train/test)
@@ -144,6 +205,7 @@ print 'best score = ' + repr(clf.best_score_)
 print 'best params:'
 print clf.best_params_
 
+
 ### Task 6: Dump your classifier, dataset, and features_list so anyone can
 ### check your results. You do not need to change anything below, but make sure
 ### that the version of poi_id.py that you submit can be run on its own and
@@ -152,5 +214,6 @@ clf = clf.best_estimator_
 sel = clf.named_steps['sel']
 features_list = ['poi'] + [features_list[i+1] for i in sel.get_support(True)]
 scores = sel.scores_[sel.get_support()]
+print zip(features_list[1:], scores)
 
 dump_classifier_and_data(clf, data_dict, features_list)
