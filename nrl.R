@@ -1,9 +1,12 @@
+# Libraries ----------------
 library(ggplot2)
 library(tidyr)
 library(dplyr)
 
+# Load data ------------
 nrl_raw <- read.csv('data/nrl_raw.csv', na.strings = "")
-nrl_long <- gather(nrl_raw, 'Year', 'Team', 2:ncol(nrl))
+
+nrl_long <- gather(nrl_raw, 'Year', 'Team', 2:ncol(nrl_raw))
 nrl_long <- nrl_long[complete.cases(nrl_long),]
 nrl_long$Year <- substr(nrl_long$Year, 2, 5)
 write.csv(nrl_long, 'data/nrl_long.csv')
