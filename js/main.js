@@ -25,6 +25,7 @@ d3.select("body")
       .attr('class', 'chart');
 
   //debugger;
+  // Create the chart
   var simpleChart = new dimple.chart(svg, data);
   simpleChart.setBounds(margin, margin, 1200, 400);
   var x = simpleChart.addTimeAxis("x", "Season", "%Y", "%Y"); 
@@ -38,15 +39,10 @@ d3.select("body")
 
   //debugger;
 
-  // This is a critical step.  By doing this we orphan the legend. This
-  // means it will not respond to graph updates.  Without this the legend
-  // will redraw when the chart refreshes removing the unchecked item and
-  // also dropping the events we define below.
+  // Orphan the chart so we can make it interactive
   simpleChart.legends = [];  
 
-  // This block simply adds the legend title. I put it into a d3 data
-  // object to split it onto 2 lines.  This technique works with any
-  // number of lines, it isn't dimple specific.
+  // Legend title
   svg.selectAll("title_text")
     .data(["Click legend to choose team:"])
     .enter()
@@ -67,7 +63,7 @@ d3.select("body")
     .on("click", function(e) {
 
       //debugger;
-      // Set all lines grey and the selection to its colour
+      // Set all other lines grey and the current selection to its colour
       var selection = e.aggField.slice(-1)[0];
       selection = selection.toLowerCase().replace(/\./g, '-');
       if (selection != "all") {
@@ -80,7 +76,7 @@ d3.select("body")
           }
         });
       } else {
-
+        // Highlight all teams
       }
       
     });
