@@ -47,33 +47,19 @@ function draw(data) {
       .text(function (d) { return d; });  
 
   // Get a unique list of Owner values to use when filtering
-  var filterValues = dimple.getUniqueValues(data, "Team");
+  var teams = dimple.getUniqueValues(data, "Team");
   // Get all the rectangles from our now orphaned legend
   legend.shapes.selectAll("rect")
     // Add a click event to each rectangle
-    .on("click", function (e) {
-      // This indicates whether the item is already visible or not
-      var hide = false;
-      var newFilters = [];
-      // If the filters contain the clicked shape hide it
-      filterValues.forEach(function (f) {
-        if (f === e.aggField.slice(-1)[0]) {
-          hide = true;
-        } else {
-          newFilters.push(f);
-        }
-      });
-      // Hide the shape or show it
-      if (hide) {
-        d3.select(this).style("opacity", 0.2);
-      } else {
-        newFilters.push(e.aggField.slice(-1)[0]);
-        d3.select(this).style("opacity", 0.8);
-      }
-      // Update the filters
-      filterValues = newFilters;
+    .on("click", function(e) {
       // Filter the data
-      simpleChart.data = dimple.filterData(data, "Team", filterValues);
+      var selection = e.aggField.slice(-1)[0];
+      if (selection === "All") {
+        selection = teams;
+      } else if (selection === "None") {
+        selection = "";
+      }
+      simpleChart.data = dimple.filterData(data, "Team", selection);
       // Passing a duration parameter makes the chart animate. Without
       // it there is no transition
       simpleChart.draw(800);
