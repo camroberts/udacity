@@ -8,6 +8,15 @@ function draw(data) {
     .append("h2")
     .text("NRL");
 
+d3.select("body")
+    .append("div")
+    .text("The National Rugby League (NRL) is Australia's premier rugby league competition. \
+      The league in its various forms has been running since 1908.  In 1990, the league \
+      introduced a salary cap in an attempt to level the playing field between participating \
+      clubs. I've set out to see if the cap had any effect on making the minor premiers \
+      of the competition more evenly spread.")
+    .attr("class", "desc");
+
   var svg = d3.select("body")
       .append("svg")
       .attr("width", width + margin)
