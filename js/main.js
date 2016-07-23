@@ -27,7 +27,7 @@ function draw(data) {
   simpleChart.assignColor("mean", "black");
   simpleChart.draw();
 
-  debugger;
+  //debugger;
 
   // This is a critical step.  By doing this we orphan the legend. This
   // means it will not respond to graph updates.  Without this the legend
@@ -49,28 +49,29 @@ function draw(data) {
       .style("color", "Black")
       .text(function (d) { return d; });  
 
-  // Get a unique list of Owner values to use when filtering
+  // Get a unique list of teams
   var teams = dimple.getUniqueValues(data, "Team");
+
   // Get all the rectangles from our now orphaned legend
   legend.shapes.selectAll("rect")
     // Add a click event to each rectangle
     .on("click", function(e) {
 
       //debugger;
-      // Set all lines grey and the selection blue
-      d3.selectAll('.dimple-line').style("stroke", "grey");
+      // Set all lines grey and the selection to its colour
       var selection = e.aggField.slice(-1)[0];
-      selection = selection.toLowerCase().replace('.', '-');
-      d3.selectAll('path.dimple-' + selection).style("stroke", "blue");
-
-      if (selection != "All") {
+      selection = selection.toLowerCase().replace(/\./g, '-');
+      if (selection != "all") {
         teams.forEach(function(iTeam) {
+          iTeam = iTeam.toLowerCase().replace(/\./g,'-');
           if (iTeam != selection) {
-            simpleChart.assignColor(iTeam, "blue", "blue")
-            d3.select(this).style("color", "blue");
-            //simpleChart.shapes.selectAll
+            d3.select('path.dimple-' + iTeam).style("stroke", "grey");
+          } else {
+            d3.select('path.dimple-' + iTeam).style("stroke", e.fill);
           }
         });
+      } else {
+
       }
       
     });
