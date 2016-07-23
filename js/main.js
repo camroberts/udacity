@@ -15,12 +15,15 @@ function draw(data) {
       .append('g')
       .attr('class', 'chart');
 
-debugger;
-var simpleChart = new dimple.chart(svg, data);
-var x = simpleChart.addTimeAxis("x", "Year", "%Y", "%Y"); 
-simpleChart.addMeasureAxis("y", "mean");
-//x.timeInterval = 4;
-simpleChart.addSeries("Mean", dimple.plot.line);
-simpleChart.draw();      
+  //debugger;
+  //data = dimple.filterData(data, "Team", ["mean", "Eastern.Suburbs"]);
+  var simpleChart = new dimple.chart(svg, data);
+  simpleChart.setBounds(margin, margin, 1200, 400);
+  var x = simpleChart.addTimeAxis("x", "Season", "%Y", "%Y"); 
+  x.timeInterval = 4;
+  simpleChart.addMeasureAxis("y", "No.Years");
+  var s = simpleChart.addSeries("Team", dimple.plot.line);
+  simpleChart.addLegend(60, 10, 1200, 80, "right");
+  simpleChart.draw();
 
 };
