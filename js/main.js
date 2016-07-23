@@ -16,15 +16,18 @@ function draw(data) {
       .attr('class', 'chart');
 
   //debugger;
-  //data = dimple.filterData(data, "Team", ["mean", "Eastern.Suburbs"]);
   var simpleChart = new dimple.chart(svg, data);
   simpleChart.setBounds(margin, margin, 1200, 400);
   var x = simpleChart.addTimeAxis("x", "Season", "%Y", "%Y"); 
   x.timeInterval = 4;
-  simpleChart.addMeasureAxis("y", "No.Years");
+  var y = simpleChart.addMeasureAxis("y", "No.Years");
+  y.overrideMin = 0;
   var s = simpleChart.addSeries("Team", dimple.plot.line);
   var legend = simpleChart.addLegend(60, 10, 1200, 80, "right");
+  simpleChart.assignColor("mean", "black");
   simpleChart.draw();
+
+  debugger;
 
   // This is a critical step.  By doing this we orphan the legend. This
   // means it will not respond to graph updates.  Without this the legend
@@ -36,7 +39,7 @@ function draw(data) {
   // object to split it onto 2 lines.  This technique works with any
   // number of lines, it isn't dimple specific.
   svg.selectAll("title_text")
-    .data(["Click legend to","show/hide owners:"])
+    .data(["Click legend to choose team:"])
     .enter()
     .append("text")
       .attr("x", 499)
@@ -52,17 +55,24 @@ function draw(data) {
   legend.shapes.selectAll("rect")
     // Add a click event to each rectangle
     .on("click", function(e) {
-      // Filter the data
+
+      //debugger;
+      // Set all lines grey and the selection blue
+      d3.selectAll('.dimple-line').style("stroke", "grey");
       var selection = e.aggField.slice(-1)[0];
-      if (selection === "All") {
-        selection = teams;
-      } else if (selection === "None") {
-        selection = "";
+      selection = selection.toLowerCase().replace('.', '-');
+      d3.selectAll('path.dimple-' + selection).style("stroke", "blue");
+
+      if (selection != "All") {
+        teams.forEach(function(iTeam) {
+          if (iTeam != selection) {
+            simpleChart.assignColor(iTeam, "blue", "blue")
+            d3.select(this).style("color", "blue");
+            //simpleChart.shapes.selectAll
+          }
+        });
       }
-      simpleChart.data = dimple.filterData(data, "Team", selection);
-      // Passing a duration parameter makes the chart animate. Without
-      // it there is no transition
-      simpleChart.draw(800);
+      
     });
 
 };
