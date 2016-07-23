@@ -15,4 +15,12 @@ function draw(data) {
       .append('g')
       .attr('class', 'chart');
 
+debugger;
+var simpleChart = new dimple.chart(svg, data);
+var x = simpleChart.addTimeAxis("x", "Year", "%Y", "%Y"); 
+simpleChart.addMeasureAxis("y", "mean");
+//x.timeInterval = 4;
+simpleChart.addSeries("Mean", dimple.plot.line);
+simpleChart.draw();      
+
 };
