@@ -24,10 +24,10 @@ function draw(data) {
       .append("p")
       .text("The chart shows as a timeseries for each team which is the number of years the club's \
         fans have been waiting to win the minor premiership. (The most important thing, right?) \
-        So, this is the number of seasons since their last win or when they entered the competion. \
+        The vertical axis represents the number of seasons since their last win or when they entered the competion. \
         A value of zero equates to winning the premiership that year. The mean number of years \
-        across all teams participating in the current season is also shown.  Finally a series which \
-        represents the current winner is shown.");
+        across all teams participating in the current season is also displayed.  Finally there's a \
+        series which shows the number of seasons the current winner took to win.");
 
   d3.select(".intro")
       .append("p")
