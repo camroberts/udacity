@@ -107,24 +107,32 @@ function draw(data) {
       //debugger;
       // Set all other lines grey and the current selection to its colour
       var selection = e.aggField.slice(-1)[0];
-      selection = selection.toLowerCase().replace(/\./g, '-');
+      var sel = selection.toLowerCase().replace(/\./g, '-');
 
       if (selection != "all") {
         
-        var idx = visible.indexOf(selection);
+        var idx = visible.indexOf(sel);
         if (idx === -1) {
           // Not visible so show
-          d3.select('path.dimple-' + selection).style("stroke", e.fill);
-          visible.push(selection);
+          d3.select('path.dimple-' + sel).style("stroke", e.fill);
+          visible.push(sel);
+          //debugger;
+          // Bring selection to the front - THIS DOESN'T WORK
+          //teams.splice(teams.indexOf(selection), 1);
+          //teams.push(selection);          
+          //s.addOrderRule(teams.concat(["Mean","Current.Premier"]));
+          //s._orderRules.shift();
         } else {
           // Already visible so hide
-          d3.select('path.dimple-' + selection).style("stroke", lightGrey);
+          d3.select('path.dimple-' + sel).style("stroke", lightGrey);
           visible.splice(idx, 1);
         }
 
       } else {
         // Turn on/off all
       }
+
+      //simpleChart.draw(600, true);
         
     });
 
