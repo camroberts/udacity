@@ -48,11 +48,21 @@ function draw(data) {
 
   // Add custom tooltip
   series.getTooltipText = function(e) {
-    //debugger;
     var str = []
     if (e.aggField[0] === 'Winner') {
-        // figure out a way to access the premier here.
-        str.push("Winner");
+        // figure out the premier - this isn't very nice
+        //debugger;
+        for (var i = 0; i < this.x.chart.data.length; i++) {
+          if (this.x.chart.data[i]["No.Years"] == 0) {
+            // It's a winner, but which year?
+            var d = new Date(e.x);
+            if (this.x.chart.data[i]["Season"] == d.getFullYear()) {
+              // Found it!
+              str.push(this.x.chart.data[i]["Team"]);
+              break;
+            }
+          }
+        }
     } else {
         str.push(e.aggField[0]);
     }
