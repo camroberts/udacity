@@ -29,6 +29,11 @@ for (i in 1:nrow(years_since_1)) {
   } else {
     prev <- years_since_1[i-1,]
     prev[is.na(prev)] <- 0
+    if (rownames(years_since_1)[i] == 1997) {
+      # Super league - so don't restart counts
+      notPrem <- !is.na(years_since_1[i-1,]) | !is.na(years_since_1[i,])
+      notPrem[prem] <- FALSE
+    } 
     years_since_1[i,notPrem] <- prev[notPrem] + 1
   }
 }
@@ -42,7 +47,7 @@ prem['1908',1] <- 1
 prem <- prem[order(rownames(prem)),]
 years_between <- data.frame(years_since_1[prem], row.names = row.names(prem))
 years_between[is.na(years_between)] <- 0
-years_since_1['Current.Premier'] <- years_between
+years_since_1['Winner'] <- years_between
 
 # Output results ---------------
 # Dimple/D3 like it in long format

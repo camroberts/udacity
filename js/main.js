@@ -11,7 +11,7 @@ function draw(data) {
   // Get a unique list of teams
   var teams = dimple.getUniqueValues(data, "Team");
   teams.splice(teams.indexOf("Mean"), 1);
-  teams.splice(teams.indexOf("Current.Premier"), 1);
+  teams.splice(teams.indexOf("Winner"), 1);
   
   // Create chart starting with all data to get legend
   var chart = new dimple.chart(svg, data);
@@ -30,7 +30,7 @@ function draw(data) {
 
   // series
   var series = chart.addSeries("Team", dimple.plot.line);
-  series.addOrderRule(teams.concat(["Mean","Current.Premier"]));
+  series.addOrderRule(teams.concat(["Mean","Winner"]));
 
   // legend
   var legend = chart.addLegend(100, 50, 1100, 100, "left");
@@ -39,13 +39,13 @@ function draw(data) {
 
   // Colouring for mean and current premier
   chart.assignColor("Mean", "red");
-  chart.assignColor("Current.Premier", "black");
+  chart.assignColor("Winner", "black");
 
   // Add custom tooltip
   series.getTooltipText = function(e) {
     //debugger;
     var str = []
-    if (e.aggField[0] === 'Current.Premier') {
+    if (e.aggField[0] === 'Winner') {
         // figure out a way to access the premier here.
         str.push("Winner");
     } else {
@@ -64,7 +64,7 @@ function draw(data) {
   chart.legends = [];
 
   // Now filter the chart just to the mean and premier
-  var visible = ["Mean", "Current.Premier"];
+  var visible = ["Mean", "Winner"];
   series.data = dimple.filterData(data, "Team", visible);
   chart.draw();
 
