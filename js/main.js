@@ -54,19 +54,23 @@ function draw(data) {
   var teamData = dimple.filterData(data, "Team", teams);
 
   var simpleChart = new dimple.chart(svg, data);
-  simpleChart.setBounds(50, 100, 1100, 400);
+  simpleChart.setBounds(50, 150, 1100, 400);
 
   var x = simpleChart.addTimeAxis("x", "Season", "%Y", "%Y"); 
   x.timeInterval = 2;
+  x.fontFamily = 'Roboto';
+  x.fontSize = 12;
 
   var y = simpleChart.addMeasureAxis("y", "No.Years");
-  y.overrideMin = 0;
+  //y.overrideMin = 0;
+  y.fontFamily = 'Roboto';
+  y.fontSize = 12;
 
   var s = simpleChart.addSeries("Team", dimple.plot.line);
   //s.lineMarkers= true;
   s.addOrderRule(teams.concat(["Mean","Current.Premier"]));
 
-  var legend = simpleChart.addLegend(100, 20, 1100, 100, "left");
+  var legend = simpleChart.addLegend(100, 50, 1100, 100, "left");
   legend.fontSize = 12;
   legend.fontFamily = 'Roboto';
 
