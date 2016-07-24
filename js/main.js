@@ -61,6 +61,7 @@ function draw(data) {
 
   var s = simpleChart.addSeries("Team", dimple.plot.line);
   //s.lineMarkers= true;
+  s.addOrderRule(teams);
 
   var legend = simpleChart.addLegend(10, 10, 1200, 80, "left");
 
