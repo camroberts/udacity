@@ -32,9 +32,8 @@ for (i in 1:nrow(years_since_1)) {
     years_since_1[i,notPrem] <- prev[notPrem] + 1
   }
 }
-mutate(years_since_1, mean = rowMeans(years_since_1, na.rm = TRUE))
-
 mean_years <- rowMeans(years_since_1, na.rm = TRUE)
+years_since_1['Mean'] <- mean_years
 
 # No. years since current premier won ---------------
 prem <- which(years_since_1 == 0, arr.ind = TRUE)
@@ -43,6 +42,17 @@ prem['1908',1] <- 1
 prem <- prem[order(rownames(prem)),]
 years_between <- data.frame(years_since_1[prem], row.names = row.names(prem))
 years_between[is.na(years_between)] <- 0
+years_since_1['Premier'] <- years_between
+
+# Output results ---------------
+# Dimple/D3 like it in long format
+stats <- data.frame(Season = rownames(years_since_1), years_since_1)
+stats <- gather(stats, Team, No.Years, -Season)
+stats <- stats[!is.na(stats$No.Years),]
+
+# Add dummy "All" team
+stats <- rbind(stats, c(2015, 'All', -1))
+write.csv(stats, 'data/nrl_stats.csv', na = "", row.names = FALSE)
 
 # No. unique premiers in last n-years -----------------
 n <- 10
@@ -73,6 +83,6 @@ for (i in 1:nrow(nrl)) {
 yearly_summary <- data.frame(years_between, mean_years, uq_prems, prem_perc)
 colnames(yearly_summary) <- c('years_between', 'mean_years', 'unique_prems', 
                               'prem_perc')
-write.csv(yearly_summary, 'data/nrl_yearly_stats.csv', na = "")
 
-# Distribution of results --------------
+
+write.csv(yearly_summary, 'data/nrl_yearly_stats.csv', na = "")

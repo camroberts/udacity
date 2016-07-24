@@ -6,7 +6,7 @@ function draw(data) {
 
   d3.select("body")
     .append("h2")
-    .text("NRL");
+    .text("NRL Salary Cap");
 
 d3.select("body")
     .append("div")
@@ -33,9 +33,13 @@ d3.select("body")
   var y = simpleChart.addMeasureAxis("y", "No.Years");
   y.overrideMin = 0;
   var s = simpleChart.addSeries("Team", dimple.plot.line);
-  var legend = simpleChart.addLegend(60, 10, 1200, 80, "right");
-  simpleChart.assignColor("mean", "black");
+  var legend = simpleChart.addLegend(10, 10, 1200, 80, "right");
+  simpleChart.assignColor("Mean", "black");
+  simpleChart.assignColor("Premier", "black");
   simpleChart.draw();
+
+  // Dash the mean
+  svg.selectAll("path.dimple-mean").style("stroke-dasharray", "2");
 
   //debugger;
 
@@ -47,8 +51,8 @@ d3.select("body")
     .data(["Click legend to choose team:"])
     .enter()
     .append("text")
-      .attr("x", 499)
-      .attr("y", function (d, i) { return 90 + i * 14; })
+      .attr("x", 10)
+      .attr("y", 10)
       .style("font-family", "sans-serif")
       .style("font-size", "10px")
       .style("color", "Black")
