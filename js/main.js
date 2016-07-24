@@ -20,7 +20,7 @@ function draw(data) {
   d3.select("body")
       .append("div")
       .text("The chart shows as a timeseries the number of years which have elapsed since \
-        a team last won the minor premiership. The mean number of years since across all \
+        a team last won the minor premiership. The mean number of years across all \
         participating teams is also shown, as well as a series for the current premier. \
         You can select an individual team by clicking on the legend.")
       .attr("class", "desc");
@@ -82,7 +82,7 @@ function draw(data) {
         teams.forEach(function(iTeam) {
           iTeam = iTeam.toLowerCase().replace(/\./g,'-');
           if (iTeam != selection) {
-            d3.select('path.dimple-' + iTeam).style("stroke", "grey");
+            d3.select('path.dimple-' + iTeam).style("stroke", "F3EFE0");
           } else {
             d3.select('path.dimple-' + iTeam).style("stroke", e.fill);
           }
