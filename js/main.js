@@ -1,8 +1,8 @@
 function draw(data) {
   "use strict";
-  var margin = 75,
-      width = 1400 - margin,
-      height = 600 - margin;
+  //var margin = 100,
+   //   width = 1400 - margin,
+   //   height = 600 - margin;
 
   var lightGrey = "F3EFE0";
 
@@ -32,8 +32,8 @@ function draw(data) {
 
   var svg = d3.select("body")
       .append("svg")
-      .attr("width", width + margin)
-      .attr("height", height + margin)
+      .attr("width", 1200)
+      .attr("height", 600)
       .append('g')
       .attr('class', 'chart');
 
@@ -51,7 +51,7 @@ function draw(data) {
   var teamData = dimple.filterData(data, "Team", teams);
 
   var simpleChart = new dimple.chart(svg, data);
-  simpleChart.setBounds(margin, margin, 1200, 400);
+  simpleChart.setBounds(50, 100, 1100, 400);
 
   var x = simpleChart.addTimeAxis("x", "Season", "%Y", "%Y"); 
   x.timeInterval = 2;
@@ -63,7 +63,7 @@ function draw(data) {
   //s.lineMarkers= true;
   s.addOrderRule(teams.concat(["Mean","Current.Premier"]));
 
-  var legend = simpleChart.addLegend(10, 10, 1200, 80, "left");
+  var legend = simpleChart.addLegend(100, 20, 1100, 100, "left");
 
   // Some base colouring
   simpleChart.assignColor("Mean", "black");
@@ -91,7 +91,7 @@ function draw(data) {
     .data(["Click legend to choose team:"])
     .enter()
     .append("text")
-      .attr("x", 10)
+      .attr("x", 100)
       .attr("y", 10)
       .style("font-family", "sans-serif")
       .style("font-size", "10px")
