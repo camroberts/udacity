@@ -1,33 +1,6 @@
 function draw(data) {
   "use strict";
 
-  d3.select("body")
-    .append("h1")
-    .text("NRL Salary Cap");
-
-  d3.select("body").append("div").attr("class", "intro");
-
-  d3.select(".intro")
-      .append("p")
-      .text("The National Rugby League (NRL) is Australia's premier rugby league competition. \
-        The league in its various forms has been running since 1908.  In 1990, the league \
-        introduced a salary cap in an attempt to level the playing field between participating \
-        clubs. I've set out to see if the cap made the competition more even by investigating the \
-        which teams have won the minor premiership over the past fifty years.");
-
-  d3.select(".intro")
-      .append("p")
-      .text("The chart shows as a timeseries for each team which is the number of years the club's \
-        fans have been waiting to win the minor premiership. (The most important thing, right?) \
-        The vertical axis represents the number of seasons since their last win or when they entered the competion. \
-        A value of zero equates to winning the premiership that year. The mean number of years \
-        across all teams participating in the current season is also displayed.  Finally there's a \
-        series which shows the number of seasons the current winner took to win.");
-
-  d3.select(".intro")
-      .append("p")
-      .text("You can toggle individual teams by clicking on the legend.");
-
   var svg = d3.select("body")
       .append("svg")
       .attr("width", 1200)
