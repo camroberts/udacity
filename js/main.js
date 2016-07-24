@@ -67,6 +67,8 @@ function draw(data) {
   s.addOrderRule(teams.concat(["Mean","Current.Premier"]));
 
   var legend = simpleChart.addLegend(100, 20, 1100, 100, "left");
+  legend.fontSize = 12;
+  legend.fontFamily = 'Roboto';
 
   // Some base colouring
   simpleChart.assignColor("Mean", "black");
@@ -90,16 +92,16 @@ function draw(data) {
   simpleChart.legends = [];  
 
   // Legend title
-  svg.selectAll("title_text")
-    .data(["Click legend to choose team:"])
-    .enter()
-    .append("text")
-      .attr("x", 100)
-      .attr("y", 10)
-      .style("font-family", "sans-serif")
-      .style("font-size", "10px")
-      .style("color", "Black")
-      .text(function (d) { return d; });
+  //svg.selectAll("title_text")
+  //  .data(["Click legend to choose team:"])
+  //  .enter()
+  //  .append("text")
+  //    .attr("x", 100)
+  //    .attr("y", 10)
+  //    .style("font-family", "Roboto")
+  //    .style("font-size", "12px")
+  //    .style("color", "Black")
+  //    .text(function (d) { return d; });
 
   // Code for interactive legend
   var visible = [];

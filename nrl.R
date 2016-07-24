@@ -55,7 +55,7 @@ stats$Season <- as.numeric(as.character(stats$Season))
 stats <- stats[stats$Season >= 1965,]
 
 # Add dummy "All" team
-stats <- rbind(stats, c(2015, 'All', -1))
+#stats <- rbind(stats, c(2015, 'All', -1))
 write.csv(stats, 'data/nrl_stats.csv', na = "", row.names = FALSE)
 
 # No. unique premiers in last n-years -----------------
