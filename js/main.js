@@ -39,7 +39,7 @@ function draw(data) {
   var simpleChart = new dimple.chart(svg, data);
   simpleChart.setBounds(margin, margin, 1200, 400);
   var x = simpleChart.addTimeAxis("x", "Season", "%Y", "%Y"); 
-  x.timeInterval = 4;
+  x.timeInterval = 2;
   var y = simpleChart.addMeasureAxis("y", "No.Years");
   y.overrideMin = 0;
   var s = simpleChart.addSeries("Team", dimple.plot.line);
