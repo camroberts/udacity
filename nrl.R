@@ -49,9 +49,13 @@ years_between <- data.frame(years_since_1[prem], row.names = row.names(prem))
 years_between[is.na(years_between)] <- 0
 years_since_1['Winner'] <- years_between
 
+# Add name of winner to every year (for use in Dimple) ---------------
+
+
 # Output results ---------------
 # Dimple/D3 like it in long format
 stats <- data.frame(Season = rownames(years_since_1), years_since_1)
+#stats['Winner.Name'] <- colnames(years_since_1)[prem[,2]]
 stats <- gather(stats, Team, No.Years, -Season)
 stats <- stats[!is.na(stats$No.Years),]
 
