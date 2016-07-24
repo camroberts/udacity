@@ -99,7 +99,7 @@ function draw(data) {
       .text(function (d) { return d; });
 
   // Get all the rectangles from our now orphaned legend
-  var highlighted = "";
+  var visible = [];
   legend.shapes.selectAll("rect")
     // Add a click event to each rectangle
     .on("click", function(e) {
@@ -108,17 +108,20 @@ function draw(data) {
       // Set all other lines grey and the current selection to its colour
       var selection = e.aggField.slice(-1)[0];
       selection = selection.toLowerCase().replace(/\./g, '-');
-      if (selection != "all") {
-        // turn off curently highlighted
-        d3.select('path.dimple-' + highlighted).style("stroke", lightGrey);
 
-        // turn on new selection
-        if (selection != highlighted) {
+      if (selection != "all") {
+        
+        var idx = visible.indexOf(selection);
+        if (idx === -1) {
+          // Not visible so show
           d3.select('path.dimple-' + selection).style("stroke", e.fill);
-          highlighted = selection;
+          visible.push(selection);
         } else {
-          highlighted = "";
+          // Already visible so hide
+          d3.select('path.dimple-' + selection).style("stroke", lightGrey);
+          visible.splice(idx, 1);
         }
+
       } else {
         // Turn on/off all
       }
