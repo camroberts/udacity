@@ -61,7 +61,7 @@ function draw(data) {
 
   var s = simpleChart.addSeries("Team", dimple.plot.line);
   //s.lineMarkers= true;
-  s.addOrderRule(teams);
+  s.addOrderRule(teams.concat(["Mean","Current.Premier"]));
 
   var legend = simpleChart.addLegend(10, 10, 1200, 80, "left");
 
@@ -99,6 +99,7 @@ function draw(data) {
       .text(function (d) { return d; });
 
   // Get all the rectangles from our now orphaned legend
+  var highlighted = "";
   legend.shapes.selectAll("rect")
     // Add a click event to each rectangle
     .on("click", function(e) {
@@ -108,18 +109,20 @@ function draw(data) {
       var selection = e.aggField.slice(-1)[0];
       selection = selection.toLowerCase().replace(/\./g, '-');
       if (selection != "all") {
-        teams.forEach(function(iTeam) {
-          iTeam = iTeam.toLowerCase().replace(/\./g,'-');
-          if (iTeam != selection) {
-            d3.select('path.dimple-' + iTeam).style("stroke", lightGrey);
-          } else {
-            d3.select('path.dimple-' + iTeam).style("stroke", e.fill);
-          }
-        });
+        // turn off curently highlighted
+        d3.select('path.dimple-' + highlighted).style("stroke", lightGrey);
+
+        // turn on new selection
+        if (selection != highlighted) {
+          d3.select('path.dimple-' + selection).style("stroke", e.fill);
+          highlighted = selection;
+        } else {
+          highlighted = "";
+        }
       } else {
-        // Highlight all teams
+        // Turn on/off all
       }
-      
+        
     });
 
 };
