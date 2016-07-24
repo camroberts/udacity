@@ -35,16 +35,39 @@ function draw(data) {
       .append('g')
       .attr('class', 'chart');
 
-  //debugger;
+  debugger;
   // Create the chart
-  var simpleChart = new dimple.chart(svg, data);
+  
+  // Separate data into summary and team
+  var meanAndPrem = dimple.filterData(data, "Team", ["Mean", "Current.Premier"]);
+
+  // Get a unique list of teams
+  var teams = dimple.getUniqueValues(data, "Team");
+  teams.splice(teams.indexOf("Mean"), 1);
+  teams.splice(teams.indexOf("Current.Premier"), 1);
+
+  data = dimple.filterData(data, "Team", teams);
+
+  var simpleChart = new dimple.chart(svg);
   simpleChart.setBounds(margin, margin, 1200, 400);
+
   var x = simpleChart.addTimeAxis("x", "Season", "%Y", "%Y"); 
   x.timeInterval = 2;
-  var y = simpleChart.addMeasureAxis("y", "No.Years");
-  y.overrideMin = 0;
-  var s = simpleChart.addSeries("Team", dimple.plot.line);
+
+  var y1 = simpleChart.addMeasureAxis("y", "No.Years");
+  y1.overrideMin = 0;
+
+  var y2 = simpleChart.addMeasureAxis("y", "No.Years");
+  y2.overrideMin = 0;
+
+  var s1 = simpleChart.addSeries("Team", dimple.plot.line, [x, y1]);
+  s1.data = meanAndPrem;
+
+  var s2 = simpleChart.addSeries("Team", dimple.plot.line, [x, y2]);
+  s2.data = data;
+
   var legend = simpleChart.addLegend(10, 10, 1200, 80, "right");
+
   simpleChart.assignColor("Mean", "black");
   simpleChart.assignColor("Current.Premier", "black");
   simpleChart.draw();
@@ -67,10 +90,7 @@ function draw(data) {
       .style("font-family", "sans-serif")
       .style("font-size", "10px")
       .style("color", "Black")
-      .text(function (d) { return d; });  
-
-  // Get a unique list of teams
-  var teams = dimple.getUniqueValues(data, "Team");
+      .text(function (d) { return d; });
 
   // Get all the rectangles from our now orphaned legend
   legend.shapes.selectAll("rect")
