@@ -37,9 +37,25 @@ function draw(data) {
   legend.fontSize = 12;
   legend.fontFamily = 'Roboto';
 
-  // Some base colouring for mean and current premier
+  // Colouring for mean and current premier
   chart.assignColor("Mean", "red");
   chart.assignColor("Current.Premier", "black");
+
+  // Add custom tooltip
+  series.getTooltipText = function(e) {
+    //debugger;
+    var str = []
+    if (e.aggField[0] === 'Current.Premier') {
+        // figure out a way to access the premier here.
+        str.push("Winner");
+    } else {
+        str.push(e.aggField[0]);
+    }
+    var d = new Date(e.x);
+    str.push("Season: " + d.getFullYear());
+    str.push("No. Years: " + Math.round(e.y * 100)/100);
+    return str;
+  };
 
   // Now draw!
   chart.draw();
@@ -51,6 +67,8 @@ function draw(data) {
   var visible = ["Mean", "Current.Premier"];
   series.data = dimple.filterData(data, "Team", visible);
   chart.draw();
+
+  //debugger;
 
   // Code for interactive legend
   legend.shapes.selectAll("rect")
