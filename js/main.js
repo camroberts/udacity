@@ -64,9 +64,12 @@ function draw(data) {
 
   var legend = simpleChart.addLegend(10, 10, 1200, 80, "left");
 
+  // Some base colouring
+  simpleChart.assignColor("Mean", "black");
+  simpleChart.assignColor("Current.Premier", "black");
   simpleChart.draw();
 
-  // Apply some colouring
+  // Apply some extra colouring
   svg.selectAll("path").style("stroke", lightGrey);
   svg.selectAll("path.dimple-current-premier").style("stroke", "black");
   svg.selectAll("path.dimple-mean")
