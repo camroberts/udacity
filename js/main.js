@@ -1,10 +1,5 @@
 function draw(data) {
   "use strict";
-  //var margin = 100,
-   //   width = 1400 - margin,
-   //   height = 600 - margin;
-
-  var lightGrey = "F3EFE0";
 
   d3.select("body")
     .append("h1")
@@ -40,108 +35,70 @@ function draw(data) {
       .append('g')
       .attr('class', 'chart');
 
-  //debugger;
-  // Create the chart
-  
-  // Separate data into summary and team
-  var meanAndPrem = dimple.filterData(data, "Team", ["Mean", "Current.Premier"]);
-
   // Get a unique list of teams
   var teams = dimple.getUniqueValues(data, "Team");
   teams.splice(teams.indexOf("Mean"), 1);
   teams.splice(teams.indexOf("Current.Premier"), 1);
+  
+  // Create chart starting with all data to get legend
+  var chart = new dimple.chart(svg, data);
+  chart.setBounds(50, 150, 1100, 400);
 
-  var teamData = dimple.filterData(data, "Team", teams);
-
-  var simpleChart = new dimple.chart(svg, data);
-  simpleChart.setBounds(50, 150, 1100, 400);
-
-  var x = simpleChart.addTimeAxis("x", "Season", "%Y", "%Y"); 
+  // x axis
+  var x = chart.addTimeAxis("x", "Season", "%Y", "%Y"); 
   x.timeInterval = 2;
   x.fontFamily = 'Roboto';
   x.fontSize = 12;
 
-  var y = simpleChart.addMeasureAxis("y", "No.Years");
-  //y.overrideMin = 0;
+  // y axis
+  var y = chart.addMeasureAxis("y", "No.Years");
   y.fontFamily = 'Roboto';
   y.fontSize = 12;
 
-  var s = simpleChart.addSeries("Team", dimple.plot.line);
-  //s.lineMarkers= true;
-  s.addOrderRule(teams.concat(["Mean","Current.Premier"]));
+  // series
+  var series = chart.addSeries("Team", dimple.plot.line);
+  series.addOrderRule(teams.concat(["Mean","Current.Premier"]));
 
-  var legend = simpleChart.addLegend(100, 50, 1100, 100, "left");
+  // legend
+  var legend = chart.addLegend(100, 50, 1100, 100, "left");
   legend.fontSize = 12;
   legend.fontFamily = 'Roboto';
 
-  // Some base colouring
-  simpleChart.assignColor("Mean", "black");
-  simpleChart.assignColor("Current.Premier", "black");
-  simpleChart.draw();
+  // Some base colouring for mean and current premier
+  chart.assignColor("Mean", "red");
+  chart.assignColor("Current.Premier", "black");
 
-  // Apply some extra colouring
-  svg.selectAll("path").style("stroke", lightGrey);
-  svg.selectAll("path.dimple-current-premier").style("stroke", "black");
-  svg.selectAll("path.dimple-mean")
-    .style("stroke-dasharray", "2")
-    .style("stroke", "black")
+  // Now draw!
+  chart.draw();
 
-  svg.selectAll(".dimple-marker,.dimple-marker-back")
-    .attr("r", 2)
-    .style("stroke", lightGrey)
+  // Orphan the legend so we can make it interactive
+  chart.legends = [];
 
-  //debugger;
-
-  // Orphan the chart so we can make it interactive
-  simpleChart.legends = [];  
-
-  // Legend title
-  //svg.selectAll("title_text")
-  //  .data(["Click legend to choose team:"])
-  //  .enter()
-  //  .append("text")
-  //    .attr("x", 100)
-  //    .attr("y", 10)
-  //    .style("font-family", "Roboto")
-  //    .style("font-size", "12px")
-  //    .style("color", "Black")
-  //    .text(function (d) { return d; });
+  // Now filter the chart just to the mean and premier
+  var visible = ["Mean", "Current.Premier"];
+  series.data = dimple.filterData(data, "Team", visible);
+  chart.draw();
 
   // Code for interactive legend
-  var visible = [];
   legend.shapes.selectAll("rect")
     // Add a click event to each rectangle
     .on("click", function(e) {
 
       //debugger;
-      // Set all other lines grey and the current selection to its colour
+      // Add selected data if not visible, remove otherwise
       var selection = e.aggField.slice(-1)[0];
-      var sel = selection.toLowerCase().replace(/\./g, '-');
-
-      if (selection != "all") {
-        
-        var idx = visible.indexOf(sel);
-        if (idx === -1) {
-          // Not visible so show
-          d3.select('path.dimple-' + sel).style("stroke", e.fill);
-          visible.push(sel);
-          //debugger;
-          // Bring selection to the front - THIS DOESN'T WORK
-          //teams.splice(teams.indexOf(selection), 1);
-          //teams.push(selection);          
-          //s.addOrderRule(teams.concat(["Mean","Current.Premier"]));
-          //s._orderRules.shift();
-        } else {
-          // Already visible so hide
-          d3.select('path.dimple-' + sel).style("stroke", lightGrey);
-          visible.splice(idx, 1);
-        }
-
+      var idx = visible.indexOf(selection);
+      if (idx === -1) {
+        // Not visible so show
+        series.data = series.data.concat(dimple.filterData(data, "Team", selection));
+        visible.push(selection);
       } else {
-        // Turn on/off all
+        // Already visible so hide
+        visible.splice(idx, 1);
+        series.data = dimple.filterData(series.data, "Team", visible);        
       }
 
-      //simpleChart.draw(600, true);
+      chart.draw(800);
         
     });
 
