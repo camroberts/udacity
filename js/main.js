@@ -35,7 +35,7 @@ function draw(data) {
       .append('g')
       .attr('class', 'chart');
 
-  debugger;
+  //debugger;
   // Create the chart
   
   // Separate data into summary and team
@@ -46,34 +46,33 @@ function draw(data) {
   teams.splice(teams.indexOf("Mean"), 1);
   teams.splice(teams.indexOf("Current.Premier"), 1);
 
-  data = dimple.filterData(data, "Team", teams);
+  var teamData = dimple.filterData(data, "Team", teams);
 
-  var simpleChart = new dimple.chart(svg);
+  var simpleChart = new dimple.chart(svg, data);
   simpleChart.setBounds(margin, margin, 1200, 400);
 
   var x = simpleChart.addTimeAxis("x", "Season", "%Y", "%Y"); 
   x.timeInterval = 2;
 
-  var y1 = simpleChart.addMeasureAxis("y", "No.Years");
-  y1.overrideMin = 0;
+  var y = simpleChart.addMeasureAxis("y", "No.Years");
+  y.overrideMin = 0;
 
-  var y2 = simpleChart.addMeasureAxis("y", "No.Years");
-  y2.overrideMin = 0;
-
-  var s1 = simpleChart.addSeries("Team", dimple.plot.line, [x, y1]);
-  s1.data = meanAndPrem;
-
-  var s2 = simpleChart.addSeries("Team", dimple.plot.line, [x, y2]);
-  s2.data = data;
+  var s = simpleChart.addSeries("Team", dimple.plot.line);
 
   var legend = simpleChart.addLegend(10, 10, 1200, 80, "right");
 
-  simpleChart.assignColor("Mean", "black");
-  simpleChart.assignColor("Current.Premier", "black");
+  //simpleChart.assignColor("Team", "F3EFE0")
+  //simpleChart.assignColor("Mean", "black");
+  //simpleChart.assignColor("Current.Premier", "black");
   simpleChart.draw();
 
-  // Dash the mean
-  svg.selectAll("path.dimple-mean").style("stroke-dasharray", "2");
+  // Apply some colouring
+  svg.selectAll("path").style("stroke", "F3EFE0");
+  svg.selectAll("path.dimple-current-premier")
+    .style("stroke", "black");
+  svg.selectAll("path.dimple-mean")
+    .style("stroke-dasharray", "2")
+    .style("stroke", "black")
 
   //debugger;
 
