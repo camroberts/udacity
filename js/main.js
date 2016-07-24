@@ -4,6 +4,8 @@ function draw(data) {
       width = 1400 - margin,
       height = 600 - margin;
 
+  var lightGrey = "F3EFE0";
+
   d3.select("body")
     .append("h2")
     .text("NRL Salary Cap");
@@ -58,21 +60,22 @@ function draw(data) {
   y.overrideMin = 0;
 
   var s = simpleChart.addSeries("Team", dimple.plot.line);
+  //s.lineMarkers= true;
 
-  var legend = simpleChart.addLegend(10, 10, 1200, 80, "right");
+  var legend = simpleChart.addLegend(10, 10, 1200, 80, "left");
 
-  //simpleChart.assignColor("Team", "F3EFE0")
-  //simpleChart.assignColor("Mean", "black");
-  //simpleChart.assignColor("Current.Premier", "black");
   simpleChart.draw();
 
   // Apply some colouring
-  svg.selectAll("path").style("stroke", "F3EFE0");
-  svg.selectAll("path.dimple-current-premier")
-    .style("stroke", "black");
+  svg.selectAll("path").style("stroke", lightGrey);
+  svg.selectAll("path.dimple-current-premier").style("stroke", "black");
   svg.selectAll("path.dimple-mean")
     .style("stroke-dasharray", "2")
     .style("stroke", "black")
+
+  svg.selectAll(".dimple-marker,.dimple-marker-back")
+    .attr("r", 2)
+    .style("stroke", lightGrey)
 
   //debugger;
 
@@ -104,7 +107,7 @@ function draw(data) {
         teams.forEach(function(iTeam) {
           iTeam = iTeam.toLowerCase().replace(/\./g,'-');
           if (iTeam != selection) {
-            d3.select('path.dimple-' + iTeam).style("stroke", "F3EFE0");
+            d3.select('path.dimple-' + iTeam).style("stroke", lightGrey);
           } else {
             d3.select('path.dimple-' + iTeam).style("stroke", e.fill);
           }
