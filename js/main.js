@@ -69,7 +69,8 @@ function draw(data) {
   chart.legends = [];
 
   // Now filter the chart just to the mean and premier
-  series.data = dimple.filterData(data, "Team", ["Mean", "Winner"]);
+  var baseData = dimple.filterData(data, "Team", ["Mean", "Winner"]);
+  series.data = baseData;
   chart.draw();
 
   //debugger;
@@ -87,7 +88,7 @@ function draw(data) {
         series.data = dimple.filterData(data, "Team", teamsPlus);
         visible = teams;
       } else if (selection === "Reset") {
-        series.data = dimple.filterData(data, "Team", ["Mean", "Winner"]);
+        series.data = baseData;
         visible = [];
       } else {
         var idx = visible.indexOf(selection);
@@ -98,7 +99,7 @@ function draw(data) {
         } else {
           // Already visible so hide
           visible.splice(idx, 1);
-          series.data = dimple.filterData(series.data, "Team", visible);        
+          series.data = baseData;
         }
       }
 
