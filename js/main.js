@@ -20,8 +20,10 @@ function draw(data) {
   d3.select("body")
       .append("div")
       .text("The chart shows as a timeseries the number of years which have elapsed since \
-        a team last won the minor premiership. The mean number of years across all \
-        participating teams is also shown, as well as a series for the current premier. \
+        a team last won the minor premiership or entered the competion.  A value of zero equates \
+        to winning the premiership that year. The mean number of years across all \
+        teams participating in the current season is also shown.  Finally a series which \
+        represents the current winner is shown. \
         You can select an individual team by clicking on the legend.")
       .attr("class", "desc");
 

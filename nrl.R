@@ -50,6 +50,10 @@ stats <- data.frame(Season = rownames(years_since_1), years_since_1)
 stats <- gather(stats, Team, No.Years, -Season)
 stats <- stats[!is.na(stats$No.Years),]
 
+# Filter to 1965 to 2015
+stats$Season <- as.numeric(as.character(stats$Season))
+stats <- stats[stats$Season >= 1965,]
+
 # Add dummy "All" team
 stats <- rbind(stats, c(2015, 'All', -1))
 write.csv(stats, 'data/nrl_stats.csv', na = "", row.names = FALSE)
