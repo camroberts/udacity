@@ -19,10 +19,11 @@ function draw(data) {
 
   d3.select("body")
       .append("div")
-      .text("The chart shows as a timeseries the number of years which have elapsed since \
-        a team last won the minor premiership or entered the competion.  A value of zero equates \
-        to winning the premiership that year. The mean number of years across all \
-        teams participating in the current season is also shown.  Finally a series which \
+      .text("The chart shows as a timeseries for each team which is the number of years the club's \
+        fans have been waiting to win the minor premiership. The most important thing, right? \
+        So, this is the number of seasons since their last win or entered the competion. \
+        A value of zero equates to winning the premiership that year. The mean number of years \
+        across all teams participating in the current season is also shown.  Finally a series which \
         represents the current winner is shown. \
         You can select an individual team by clicking on the legend.")
       .attr("class", "desc");
@@ -45,7 +46,7 @@ function draw(data) {
   var s = simpleChart.addSeries("Team", dimple.plot.line);
   var legend = simpleChart.addLegend(10, 10, 1200, 80, "right");
   simpleChart.assignColor("Mean", "black");
-  simpleChart.assignColor("Premier", "black");
+  simpleChart.assignColor("Current.Premier", "black");
   simpleChart.draw();
 
   // Dash the mean

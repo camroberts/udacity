@@ -42,7 +42,7 @@ prem['1908',1] <- 1
 prem <- prem[order(rownames(prem)),]
 years_between <- data.frame(years_since_1[prem], row.names = row.names(prem))
 years_between[is.na(years_between)] <- 0
-years_since_1['Premier'] <- years_between
+years_since_1['Current.Premier'] <- years_between
 
 # Output results ---------------
 # Dimple/D3 like it in long format
