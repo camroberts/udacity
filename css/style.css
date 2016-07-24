@@ -1,4 +1,24 @@
-h2 {
-  text-align: center;
-  color: black;
+body {
+  font-family: 'Roboto', sans-serif;
+  font-style: normal;
+  font-variant: normal;
+  font-stretch: normal;
+  text-align: left;
+}
+
+h1 {
+  color: #757575;  
+  font-weight: 300;
+  font-size: 34px;
+  line-height: 40px;
+  letter-spacing: -.01em;
+  margin: 40px 0 20px;
+  border-bottom: 1px solid #ebebeb;
+}
+
+.intro {
+  color: #212121;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;  
 }

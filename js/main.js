@@ -7,28 +7,28 @@ function draw(data) {
   var lightGrey = "F3EFE0";
 
   d3.select("body")
-    .append("h2")
+    .append("h1")
     .text("NRL Salary Cap");
 
-  d3.select("body")
-      .append("div")
+  d3.select("body").append("div").attr("class", "intro");
+
+  d3.select(".intro")
+      .append("p")
       .text("The National Rugby League (NRL) is Australia's premier rugby league competition. \
         The league in its various forms has been running since 1908.  In 1990, the league \
         introduced a salary cap in an attempt to level the playing field between participating \
         clubs. I've set out to see if the cap had any effect on making the minor premiers \
-        of the competition more evenly spread.")
-      .attr("class", "intro");
+        of the competition more evenly spread.");
 
-  d3.select("body")
-      .append("div")
+  d3.select(".intro")
+      .append("p")
       .text("The chart shows as a timeseries for each team which is the number of years the club's \
         fans have been waiting to win the minor premiership. The most important thing, right? \
         So, this is the number of seasons since their last win or entered the competion. \
         A value of zero equates to winning the premiership that year. The mean number of years \
         across all teams participating in the current season is also shown.  Finally a series which \
         represents the current winner is shown. \
-        You can select an individual team by clicking on the legend.")
-      .attr("class", "desc");
+        You can select an individual team by clicking on the legend.");
 
   var svg = d3.select("body")
       .append("svg")
@@ -98,7 +98,7 @@ function draw(data) {
       .style("color", "Black")
       .text(function (d) { return d; });
 
-  // Get all the rectangles from our now orphaned legend
+  // Code for interactive legend
   var visible = [];
   legend.shapes.selectAll("rect")
     // Add a click event to each rectangle
