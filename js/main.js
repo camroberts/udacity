@@ -32,8 +32,9 @@ function draw(data) {
   y.fontSize = 12;
 
   // series
+  var baseCat = ["Mean.Pre","Mean.Post","Mean","Winner"];
   var series = chart.addSeries("Team", dimple.plot.line);
-  series.addOrderRule(teams.concat(["Mean","Winner","Show All","Reset"]));
+  series.addOrderRule(teams.concat(baseCat).concat(["Show All","Reset"]));
 
   // legend
   var legend = chart.addLegend(100, 50, 1100, 100, "left");
@@ -77,11 +78,15 @@ function draw(data) {
   // Now draw!
   chart.draw();
 
+  //debugger;
+  //legend.shapes.select(".dimple-mean-pre").text("");
+  //legend.shapes.select(".dimple-mean-pre").style("fill","white");
+
   // Orphan the legend so we can make it interactive
   chart.legends = [];
 
   // Now filter the chart just to the means and premier
-  var baseData = dimple.filterData(data, "Team", ["Mean.Pre", "Mean.Post", "Mean", "Winner"]);
+  var baseData = dimple.filterData(data, "Team", baseCat);
   series.data = baseData;
   chart.draw();
 
@@ -114,7 +119,7 @@ function draw(data) {
       } else if (selection === "Reset") {
         series.data = baseData;
         visible = [];
-      } else {
+      } else if (baseCat.indexOf(selection) == -1) {
         var idx = visible.indexOf(selection);
         if (idx === -1) {
           // Not visible so show
