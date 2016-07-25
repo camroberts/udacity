@@ -1,7 +1,7 @@
 # NRL Salary Cap
 
 ## Summary
-The National Rugby League (NRL) is Australia's premier rugby league football competition. The league in its various forms has been running since 1908. In 1990, the league introduced a salary cap in an attempt to level the playing field between participating clubs. I've set out to see if the cap made the competition more even by investigating the end of regular season standings of participating teams over the past fifty years. Primarily I'm interested in how many seasons pass between minor premiership wins (ie. finishing first in the table) and how long the fans are waiting for their team to win.  Afterall, this is the often the most important thing to a fan - winning.
+The National Rugby League (NRL) is Australia's premier rugby league football competition. The league in its various forms has been running since 1908. In 1990, the league introduced a salary cap in an attempt to level the playing field between participating clubs. I've set out to see if the cap made the competition more even by investigating the end of regular season standings of participating teams over the past fifty years. Primarily I'm interested in how many seasons pass between minor premiership wins (ie. finishing first in the table) and how long the fans are waiting for their team to win.  After all, this is the often the most important thing to a fan - winning.
 
 I've used the minor premiership rather than the champion or grand final winner since I feel that a team which leads over twenty or thirty rounds and loses the final is still the best performing team of that season. However, many would argue fans care more about the grand final winner. So this analysis could be performed again using that as the benchmark instead.
 
@@ -13,9 +13,11 @@ I really wanted to involve the viewer in the chart, to allow them to discover th
 1. A chart which shows the number of unique winners of the minor premiership in the last n years. The viewer would be able to choose n.
 2. A chart which shows the number of years each team has been waiting to win the minor premiership. The viewer would be able to choose different teams.
 
-Ultimately, I choose the second option as I felt this was more engaging. Especially if the viewer is a rugby league fan and isable to choose their own team.  As well as hopefully illustrating if the salary cap did or did not have a levelling effect the chart also also provides a neat way of showing the history of the competition.
+Ultimately, I choose the second option as I felt this was more engaging. Especially if the viewer is a rugby league fan and is able to choose their own team.  As well as hopefully illustrating if the salary cap did or did not have a levelling effect the chart also provides a neat way of showing the history of the competition.
 
 I chose to implement the chart in Dimple.js rather than D3.js as I thought being a relatively straight forward line chart, it would be smoother experience.  However, even with this chart, I feel I reached the limit of what could be done with Dimple and I regretted my choice in the end.  The availability of features somewhat determined the final design, more of which I'll discuss in the feedback section.
+
+The interactivity of the chart is provided through the legend. I found examples of Dimple.js charts using the legend as buttons. While the end product works, I'm not 100% happy with the method. Without explaining, it's not obvious the legend behaves like this, and it's clumsy to implement.
 
 ## Feedback
 ### Round 1
@@ -35,7 +37,7 @@ In 2001 it says New Zealand 1. If that is the case wouldn't that mean they won i
 #### Response
 As a result of dad's feedback I made the following major changes:
 * Restricted the data set to 1965 - 2015.
-* Gave up on "greying out" the unselected teams since I could not acheive the polish with Dimple I required. Instead I changed to filtering the data so that only selected lines are show.
+* Gave up on "greying out" the unselected teams since I could not achieve the polish with Dimple I required. Instead I changed to filtering the data so that only selected lines are show.
 * Made the premier and mean lines stand out in bolder red and black colours.
 
 ### Round 2
@@ -43,7 +45,7 @@ The visualisation provided in folder v0.2 was the second attempt and was sent to
 
 #### Feedback
 * Would it be clearer if you named the vertical axis "No. of years since winning Minor Premiership"?
-* Can you change the lables on the horizontal axis to say the year & the minor premier for that year?
+* Can you change the labels on the horizontal axis to say the year & the minor premier for that year?
 * I had a look at Cronulla. 1998 shows 1 year since winning, but 1997 was not won by Cronulla.
 * Not sure what "All" is
 
