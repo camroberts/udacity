@@ -14,7 +14,9 @@ function draw(data) {
   teams.splice(teams.indexOf("Reset"), 1);
   var teamsPlus = teams.slice();
   teams.splice(teams.indexOf("Mean"), 1);
-  teams.splice(teams.indexOf("Winner"), 1);  
+  teams.splice(teams.indexOf("Winner"), 1);
+  teams.splice(teams.indexOf("Mean.Before"), 1);
+  teams.splice(teams.indexOf("Mean.After"), 1);
   
   // Create chart starting with all data to get legend
   var chart = new dimple.chart(svg, data);
@@ -32,7 +34,7 @@ function draw(data) {
   y.fontSize = 12;
 
   // series
-  var baseCat = ["Mean.Pre","Mean.Post","Mean","Winner"];
+  var baseCat = ["Mean.Before","Mean.After","Mean","Winner"];
   var series = chart.addSeries("Team", dimple.plot.line);
   series.addOrderRule(teams.concat(baseCat).concat(["Show All","Reset"]));
 
@@ -43,8 +45,8 @@ function draw(data) {
 
   // Colouring for mean and current premier
   chart.assignColor("Mean", "red");
-  chart.assignColor("Mean.Pre", "red");
-  chart.assignColor("Mean.Post", "red");
+  chart.assignColor("Mean.Before", "red");
+  chart.assignColor("Mean.After", "red");
   chart.assignColor("Winner", "black");
   chart.assignColor("Show All", "white");
   chart.assignColor("Reset", "white");
@@ -91,8 +93,8 @@ function draw(data) {
   chart.draw();
 
   // Make mean pre and post dotted
-  svg.selectAll("path.dimple-mean-pre").style("stroke-dasharray", "2");
-  svg.selectAll("path.dimple-mean-post").style("stroke-dasharray", "2");
+  svg.selectAll("path.dimple-mean-before").style("stroke-dasharray", "2");
+  svg.selectAll("path.dimple-mean-after").style("stroke-dasharray", "2");
 
   // Add vertical line to show salary cap start
   var salaryCapStart = new Date("1990");

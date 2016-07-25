@@ -46,8 +46,8 @@ for (i in 1:nrow(years_since_1)) {
 mean_years <- rowMeans(years_since_1, na.rm = TRUE)
 years_since_1['Mean'] <- mean_years
 mean_years <- data.frame(mean = mean_years, year = as.numeric(names(mean_years)))
-years_since_1['Mean.Pre'] <- mean(mean_years[mean_years$year < 1990 & mean_years$year >= 1965,1])
-years_since_1['Mean.Post'] <- mean(mean_years[mean_years$year >= 1990,1])
+years_since_1['Mean.Before'] <- mean(mean_years[mean_years$year < 1990 & mean_years$year >= 1965,1])
+years_since_1['Mean.After'] <- mean(mean_years[mean_years$year >= 1990,1])
 
 # No. years since current premier won ---------------
 prem <- which(years_since_1 == 0, arr.ind = TRUE)
@@ -68,8 +68,8 @@ stats <- stats[!is.na(stats$No.Years),]
 stats$Season <- as.numeric(as.character(stats$Season))
 stats <- stats[stats$Season >= 1965,]
 
-stats <- stats[!(stats$Season < 1990 & stats$Team == "Mean.Post"),]
-stats <- stats[!(stats$Season > 1990 & stats$Team == "Mean.Pre"),]
+stats <- stats[!(stats$Season < 1990 & stats$Team == "Mean.After"),]
+stats <- stats[!(stats$Season > 1990 & stats$Team == "Mean.Before"),]
 
 # Add dummy "All/None" team
 stats <- rbind(stats, c(2015, 'Show All', -1))
