@@ -19,6 +19,8 @@ I chose to implement the chart in Dimple.js rather than D3.js as I thought being
 
 The interactivity of the chart is provided through the legend. I found examples of Dimple.js charts using the legend as buttons. While the end product works, I'm not 100% happy with the method. Without explaining, it's not obvious the legend behaves like this, and it's clumsy to implement.
 
+Data preparation was done in R. The raw data set was originally the ladder positions of each team for each season. Calculating the time between minor premierships was programmed.
+
 ## Feedback
 ### Round 1
 The visualisation provided in folder v0.1 was the first attempt at the chart and was quite a rough sketch basically. I provided the chart to my father.
@@ -60,9 +62,12 @@ After my mum's feedback I made the following changes:
 Folder v0.3 contains the third version for which I sought feedback. This time, my wife was the victim.
 
 #### Feedback
-*
+* Why does the mean and winner lines move when clicking them?
+* Need to highlight before and after salary cap more.
 
 #### Response
+* The buttons for mean and winner were not working correctly, they should have no action, as I want the to remain in the chart.
+* To address the relationship of the data with the salary cap more which has been an ongoing theme in the feedback, I added some extra mean lines to show the difference. (Unfortunately, I can not figure out how to remove these from the legend. Or at least have the separate.)
 
 ## Resources
 * http://www.rugbyleagueproject.org/competitions/nrl/seasons.html
