@@ -33,7 +33,13 @@ for (i in 1:nrow(years_since_1)) {
       # Super league - so don't restart counts
       notPrem <- !is.na(years_since_1[i-1,]) | !is.na(years_since_1[i,])
       notPrem[prem] <- FALSE
-    } 
+    } else if (rownames(years_since_1)[i] == 1999) {
+      # St George and Illawarra merged, so take the mean of the two
+      prev$St.George.Illawarra <- ceiling(prev$St.George * 0.5 + prev$Illawarra * 0.5)
+    } else if (rownames(years_since_1)[i] == 2000) {
+      # Balmain and Wests merged, so tahe the mean of the two
+      prev$Wests.Tigers <- ceiling(prev$Western.Suburbs * 0.5 + prev$Balmain * 0.5)
+    }
     years_since_1[i,notPrem] <- prev[notPrem] + 1
   }
 }
@@ -48,9 +54,6 @@ prem <- prem[order(rownames(prem)),]
 years_between <- data.frame(years_since_1[prem], row.names = row.names(prem))
 years_between[is.na(years_between)] <- 0
 years_since_1['Winner'] <- years_between
-
-# Add name of winner to every year (for use in Dimple) ---------------
-
 
 # Output results ---------------
 # Dimple/D3 like it in long format
