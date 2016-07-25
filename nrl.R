@@ -69,7 +69,7 @@ stats$Season <- as.numeric(as.character(stats$Season))
 stats <- stats[stats$Season >= 1965,]
 
 stats <- stats[!(stats$Season < 1990 & stats$Team == "Mean.Post"),]
-stats <- stats[!(stats$Season >= 1990 & stats$Team == "Mean.Pre"),]
+stats <- stats[!(stats$Season > 1990 & stats$Team == "Mean.Pre"),]
 
 # Add dummy "All/None" team
 stats <- rbind(stats, c(2015, 'Show All', -1))
