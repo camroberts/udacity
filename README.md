@@ -75,3 +75,4 @@ Folder v0.3 contains the third version for which I sought feedback. This time, m
 * https://github.com/PMSI-AlignAlytics/dimple/wiki/dimple.legend
 * http://stackoverflow.com/questions/4170117/how-to-parse-the-year-from-this-date-string-in-javascript
 * http://stackoverflow.com/questions/11832914/round-to-at-most-2-decimal-places-in-javascript
+* http://stackoverflow.com/questions/29352970/dimple-js-add-vertical-line

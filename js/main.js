@@ -83,7 +83,15 @@ function draw(data) {
   series.data = baseData;
   chart.draw();
 
-  //debugger;
+  // Add vertical line to show salary cap start
+  var salaryCapStart = new Date("1990");
+  svg.append("line")
+      .attr("x1", x._scale(salaryCapStart))
+      .attr("x2", x._scale(salaryCapStart))
+      .attr("y1", chart._yPixels())
+      .attr("y2", chart._yPixels() + chart._heightPixels())
+      .style("stroke", "grey")
+      .style("stroke-dasharray", "3");
 
   // Code for interactive legend
   var visible = [];
