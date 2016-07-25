@@ -31,28 +31,32 @@ The visualisation provided in folder v0.1 was the first attempt at the chart and
 * Some Teams/colors are very hard to see.
 * So, if the salary cap was effective how would that be revealed on the graph?
 * The graphic, on first impressions, seems to be very busy with lots of lines.
-* I am not sure the data is represented correctly. For example, in 1998 it shows Brisbane 0 years.  We interpret this to mean they won the premiership in 1998.
-But in 2000 Team Brisbane 0 years. But it would in fact be 2 years since they won it if they won it in 1998.
-In 2001 it says New Zealand 1. If that is the case wouldn't that mean they won it in 2000?  But Brisbane did.
 * The time period is maybe too long. Perhaps just look at 25yrs before and after the salary cap introduction.
+* Would it be clearer if you named the vertical axis "No. of years since winning Minor Premiership"?
 
 #### Response
 As a result of dad's feedback I made the following major changes:
 * Restricted the data set to 1965 - 2015.
-* Gave up on "greying out" the unselected teams since I could not achieve the polish with Dimple I required. Instead I changed to filtering the data so that only selected lines are show.
-* Made the premier and mean lines stand out in bolder red and black colours.
+* Made the background team lines lighter grey.
+* Made the premier and mean lines stand out in bolder black colour.
+* Improved the explanation in the introduction.
+* I did not change the y axis label as it means slightly different things for the different series. No. years or seasons is a constant.
+* Allowed the ability to toggle teams.
 
 ### Round 2
 The visualisation provided in folder v0.2 was the second attempt and was sent to my mother for feedback.
 
 #### Feedback
-* Would it be clearer if you named the vertical axis "No. of years since winning Minor Premiership"?
 * Can you change the labels on the horizontal axis to say the year & the minor premier for that year?
+* I am not sure the data is represented correctly. For example, in 1998 it shows Brisbane 0 years.  We interpret this to mean they won the premiership in 1998.
+But in 2000 Team Brisbane 0 years. But it would in fact be 2 years since they won it if they won it in 1998.
+In 2001 it says New Zealand 1. If that is the case wouldn't that mean they won it in 2000?  But Brisbane did.
 * I had a look at Cronulla. 1998 shows 1 year since winning, but 1997 was not won by Cronulla.
 * Not sure what "All" is
 
 #### Response
 After my mum's feedback I made the following changes:
+* Gave up on "greying out" the unselected teams since I could not achieve the polish with Dimple I required. Instead I changed to filtering the data so that only selected lines are show.
 * Improved the All button to Show All and Reset.
 * Investigated some of the data issues. I discovered the problem leading to misinterpreted results is that in the late nineties there was a lot of upheaval in the competition. In fact a rival league ran for a single season and around half the teams defected to that competition before returning the following. As a side effect, the count of the number of years since winning or entering the competition was reset. I overcame this issue, by treating this gap year as a continuation in which the non-competing teams did not win.
 * Customised the tool tips for the "Winner" series to show the name of the winning team for that year.
@@ -64,10 +68,12 @@ Folder v0.3 contains the third version for which I sought feedback. This time, m
 #### Feedback
 * Why does the mean and winner lines move when clicking them?
 * Need to highlight before and after salary cap more.
+* What happens when teams merge?
 
 #### Response
 * The buttons for mean and winner were not working correctly, they should have no action, as I want the to remain in the chart.
-* To address the relationship of the data with the salary cap more which has been an ongoing theme in the feedback, I added some extra mean lines to show the difference. (Unfortunately, I can not figure out how to remove these from the legend. Or at least have the separate.)
+* There were two mergers of teams into a new club in 1999 and 2000. These had the effect of resetting the count for the new team, while in effect they should in some sense inherit the history of the merging clubs. So I continued the count of the years elapsed by taking the average of the two merging teams.
+* To address the relationship of the data with the salary cap more which has been an ongoing theme in the feedback, I added some extra mean lines to show the difference. (Unfortunately, I cannot figure out how to remove these from the legend. Or at least have them separate.)
 
 ## Resources
 * http://www.rugbyleagueproject.org/competitions/nrl/seasons.html
