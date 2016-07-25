@@ -1,6 +1,7 @@
 function draw(data) {
   "use strict";
 
+  // base svg element
   var svg = d3.select(".chart")
       .append("svg")
       .attr("width", 1200)
@@ -81,7 +82,7 @@ function draw(data) {
   chart.draw();
 
   //debugger;
-  // Hide legend items I don't want to show
+  // Hide legend items I don't want to show - can't get this to work
   //legend.shapes.select(".dimple-mean-pre").text("");
   //legend.shapes.select(".dimple-mean-pre").style("fill","white");
 
@@ -125,7 +126,6 @@ function draw(data) {
     // Add a click event to each rectangle
     .on("click", function(e) {
 
-      //debugger;
       // Add selected data if not visible, remove otherwise
       var selection = e.aggField.slice(-1)[0];
       if (selection === "Show All") {
@@ -138,13 +138,12 @@ function draw(data) {
         var idx = visible.indexOf(selection);
         if (idx === -1) {
           // Not visible so show
-          series.data = series.data.concat(dimple.filterData(data, "Team", selection));
           visible.push(selection);
         } else {
           // Already visible so hide
           visible.splice(idx, 1);
-          series.data = baseData;
         }
+        series.data = baseData.concat(dimple.filterData(data, "Team", visible));
       }
 
       chart.draw(800);
