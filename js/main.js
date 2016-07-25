@@ -1,7 +1,7 @@
 function draw(data) {
   "use strict";
 
-  var svg = d3.select("body")
+  var svg = d3.select(".chart")
       .append("svg")
       .attr("width", 1200)
       .attr("height", 600)
@@ -34,7 +34,7 @@ function draw(data) {
   y.fontSize = 12;
 
   // series
-  var baseCat = ["Mean.Before","Mean.After","Mean","Winner"];
+  var baseCat = ["Winner","Mean","Mean.Before","Mean.After"];
   var series = chart.addSeries("Team", dimple.plot.line);
   series.addOrderRule(teams.concat(baseCat).concat(["Show All","Reset"]));
 
@@ -81,8 +81,21 @@ function draw(data) {
   chart.draw();
 
   //debugger;
+  // Hide legend items I don't want to show
   //legend.shapes.select(".dimple-mean-pre").text("");
   //legend.shapes.select(".dimple-mean-pre").style("fill","white");
+
+  // legend title
+  svg.selectAll("title_text")
+    .data(["Click legend to choose team:"])
+    .enter()
+    .append("text")
+      .attr("x", 100)
+      .attr("y", 30)
+      .style("font-family", "Roboto")
+      .style("font-size", "12px")
+      .style("color", "Black")
+      .text(function (d) { return d; });
 
   // Orphan the legend so we can make it interactive
   chart.legends = [];
