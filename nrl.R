@@ -45,6 +45,9 @@ for (i in 1:nrow(years_since_1)) {
 }
 mean_years <- rowMeans(years_since_1, na.rm = TRUE)
 years_since_1['Mean'] <- mean_years
+mean_years <- data.frame(mean = mean_years, year = as.numeric(names(mean_years)))
+years_since_1['Mean.Pre'] <- mean(mean_years[mean_years$year < 1990 & mean_years$year >= 1965,1])
+years_since_1['Mean.Post'] <- mean(mean_years[mean_years$year >= 1990,1])
 
 # No. years since current premier won ---------------
 prem <- which(years_since_1 == 0, arr.ind = TRUE)
@@ -58,13 +61,15 @@ years_since_1['Winner'] <- years_between
 # Output results ---------------
 # Dimple/D3 like it in long format
 stats <- data.frame(Season = rownames(years_since_1), years_since_1)
-#stats['Winner.Name'] <- colnames(years_since_1)[prem[,2]]
 stats <- gather(stats, Team, No.Years, -Season)
 stats <- stats[!is.na(stats$No.Years),]
 
 # Filter to 1965 to 2015
 stats$Season <- as.numeric(as.character(stats$Season))
 stats <- stats[stats$Season >= 1965,]
+
+stats <- stats[!(stats$Season < 1990 & stats$Team == "Mean.Post"),]
+stats <- stats[!(stats$Season >= 1990 & stats$Team == "Mean.Pre"),]
 
 # Add dummy "All/None" team
 stats <- rbind(stats, c(2015, 'Show All', -1))

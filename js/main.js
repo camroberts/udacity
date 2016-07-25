@@ -42,6 +42,8 @@ function draw(data) {
 
   // Colouring for mean and current premier
   chart.assignColor("Mean", "red");
+  chart.assignColor("Mean.Pre", "red");
+  chart.assignColor("Mean.Post", "red");
   chart.assignColor("Winner", "black");
   chart.assignColor("Show All", "white");
   chart.assignColor("Reset", "white");
@@ -78,10 +80,14 @@ function draw(data) {
   // Orphan the legend so we can make it interactive
   chart.legends = [];
 
-  // Now filter the chart just to the mean and premier
-  var baseData = dimple.filterData(data, "Team", ["Mean", "Winner"]);
+  // Now filter the chart just to the means and premier
+  var baseData = dimple.filterData(data, "Team", ["Mean.Pre", "Mean.Post", "Mean", "Winner"]);
   series.data = baseData;
   chart.draw();
+
+  // Make mean pre and post dotted
+  svg.selectAll("path.dimple-mean-pre").style("stroke-dasharray", "2");
+  svg.selectAll("path.dimple-mean-post").style("stroke-dasharray", "2");
 
   // Add vertical line to show salary cap start
   var salaryCapStart = new Date("1990");
