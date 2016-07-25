@@ -70,36 +70,3 @@ stats <- stats[stats$Season >= 1965,]
 stats <- rbind(stats, c(2015, 'Show All', -1))
 stats <- rbind(stats, c(2015, 'Reset', -1))
 write.csv(stats, 'data/nrl_stats.csv', na = "", row.names = FALSE)
-
-# No. unique premiers in last n-years -----------------
-n <- 10
-uq_prems <- data.frame(integer(nrow(nrl)), row.names = rownames(nrl))
-for (i in 1:nrow(nrl)) {
-  if (i == 1) {
-    uq_prems[i,] <- 1
-  } else {
-    prems <- which(nrl[(i-(min(i,n)-1)):i,] == 1, arr.ind = TRUE)
-    uq_prems[i,] <- length(unique(prems[,2]))  
-  }
-}
-
-# Perc of possible premiers in last n-years -----------------
-n <- 10
-prem_perc <- data.frame(integer(nrow(nrl)), row.names = rownames(nrl))
-for (i in 1:nrow(nrl)) {
-  if (i == 1) {
-    prem_perc[i,] <- 1/min(n, sum(!is.na(nrl[i,])))
-  } else {
-    results <- nrl[(i-(min(i,n)-1)):i,]
-    prems <- which(results == 1, arr.ind = TRUE)
-    teams <- which(!is.na(results), arr.ind = TRUE)
-    prem_perc[i,] <- length(unique(prems[,2]))/min(n, length(unique(teams[,2])))
-  }
-}
-
-yearly_summary <- data.frame(years_between, mean_years, uq_prems, prem_perc)
-colnames(yearly_summary) <- c('years_between', 'mean_years', 'unique_prems', 
-                              'prem_perc')
-
-
-write.csv(yearly_summary, 'data/nrl_yearly_stats.csv', na = "")
