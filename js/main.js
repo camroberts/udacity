@@ -53,6 +53,34 @@ function draw(data) {
     chart.assignColor("Show All", "white");
     chart.assignColor("Reset", "white");
 
+    // Colouring for teams!
+    chart.assignColor("Adelaide", "#ffcc00");
+    chart.assignColor("Balmain", "#ff6600");
+    chart.assignColor("Brisbane", "maroon");
+    chart.assignColor("Canberra", "lime");
+    chart.assignColor("Canterbury", "#3333cc");
+    chart.assignColor("Cronulla", "#99ccff");
+    chart.assignColor("Eastern.Sydney", "#003366");
+    chart.assignColor("Gold.Coast", "#00ffcc");
+    chart.assignColor("Gold.Coast.Titans", "#00cc99");
+    chart.assignColor("Illawarra", "red");
+    chart.assignColor("Manly.Warringah", "#b30000");
+    chart.assignColor("Melbourne", "#660033");
+    chart.assignColor("Newcastle", "#990033");
+    chart.assignColor("Newtown", "#0066ff");
+    chart.assignColor("North.Queensland", "#52527a");
+    chart.assignColor("North.Sydney", "#4d0000");
+    chart.assignColor("Parramatta", "yellow");
+    chart.assignColor("Penrith", "brown");
+    chart.assignColor("South.Queensland", "#b3b300");
+    chart.assignColor("South.Sydney", "#009900");
+    chart.assignColor("St.George", "#ff6666");
+    chart.assignColor("St.George.Illawarra", "red");
+    chart.assignColor("Warriors", "black");
+    chart.assignColor("Western.Reds", "#993300");
+    chart.assignColor("Western.Suburbs", "#3d3d29");
+    chart.assignColor("Wests.Tigers", "#ff6600");
+
     // Add custom tooltip
     series.getTooltipText = function(e) {
         var str = []
@@ -114,6 +142,10 @@ function draw(data) {
         .style("stroke-dasharray", "2");
     svg.selectAll("path.dimple-mean-after")
         .style("stroke-dasharray", "2");
+    svg.selectAll("path.dimple-mean")
+        .style("stroke-dasharray", "10,2")
+    svg.selectAll("path.dimple-winner")
+        .style("stroke-dasharray", "10,2")
 
     // Add vertical line to show salary cap start
     var salaryCapStart = new Date("1990");
