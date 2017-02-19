@@ -1,0 +1,422 @@
+P4: Explore and Summarize Data - White Wine Quality by Cameron Roberts
+========================================================
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, packages}
+# Load all of the packages that you end up using
+# in your analysis in this code chunk.
+
+# Notice that the parameter "echo" was set to FALSE for this code chunk.
+# This prevents the code from displaying in the knitted HTML output.
+# You should set echo=FALSE for all code chunks in your file.
+
+library(ggplot2)
+library(dplyr)
+library(reshape2)
+library(GGally)
+library(MASS)
+library(memisc)
+```
+
+```{r echo=FALSE, read_data}
+# Load the Data (I removed the first header)
+wine <- read.csv('wineQualityWhites.csv')
+```
+
+# Description of data set
+The white wine quality data set has the following structure:
+
+```{r echo=FALSE, data_structure}
+str(wine)
+```
+
+There are 4898 observatios of 11 factors which descibe the physicochemical characteristics of white wines.  The wines were given a quality score by experts provided in the quality variable.  The objective of this exploration is to determine what effect (if any) these factors have on the quality of the wine.
+
+Should I create 'fixed' sulfur? ie. the difference between free sulfur and total?
+
+A quick numeric summary of the data shows the ranges and central measures of each of the variables.
+
+```{r echo=FALSE, summary}
+summary(wine)
+```
+
+# Univariate Analysis
+To get a quick overview all variables, I'll plot a grid of histograms by melting the data.
+
+```{r echo=FALSE, results='hide', long_format}
+wine_long <- melt(wine)
+```
+
+```{r echo=FALSE, histogram_matrix}
+ggplot(wine_long, aes(value)) +
+  geom_histogram() +
+  facet_wrap(~variable, scales = 'free')
+```
+
+Most of the variables have reasonably bell-shaped plots. Residual sugar and alcohol are exceptions here. A number are also quite long tailed suggesting some outliers are present in the data. I'll remove points greater than three standard deviations from mean from each variable (except quality) and do this again.
+
+```{r, echo=FALSE, hist_matrix_clean}
+wine_stats <- wine_long %>%
+  group_by(variable) %>%
+  summarise(mean = mean(value), std.dev = sd(value))
+
+wine_long %>% 
+  inner_join(wine_stats, by = 'variable') %>%
+  subset(variable == 'quality' | value <= mean + 3*std.dev, select = -c(mean, std.dev)) %>%
+  ggplot(data=., aes(value)) +
+  geom_histogram() +
+  facet_wrap(~variable, scales = 'free')
+```
+
+This is a nice way to see all the variables side by side.  With some finnicking I could maybe adjust the binwidths for each, but I'll leave this for now.
+
+Instead, I'll look at a few individually:
+
+### Quality
+
+```{r echo=FALSE, quality_hist}
+ggplot(wine, aes(quality)) + geom_histogram(binwidth = 1)
+```
+
+The quality variable seems to be roughly bell shaped suggesting it could be normally distributed. Using a bin width of 1 here is an obvious choice since the scores are all integers. The does mean though that we cannot get a finer grained view of the quality. The possbile values of quality were 0 to 10, but there are no wines less than 3 or greater than 9.
+
+### pH
+We know pH is a log scale so transform first
+
+```{r, echo=FALSE, pH_hist}
+wine$pH <- log10(wine$pH)
+ggplot(wine, aes(pH)) +
+  geom_histogram(binwidth = .01)
+```
+
+### Alcohol
+```{r echo=FALSE, alcohol_hist}
+ggplot(wine, aes(alcohol)) +
+  geom_histogram(binwidth = .1)
+```
+
+Alcohol is skewed to the left which may make some sense since it is probably an objective not to make the wine too alcoholic but there is a minimum which is the result of the fermentation process.
+
+At this stage, I have little idea what variables will have an effect on quality of the wine. I can take some direction from the description provided in the [wineQualityInfo.txt](wineQualityInfo.txt) file. My initial thoughts are that variables that may affect taste/quality are those related to acidity, sugar, salt and the alcohol content.  I'm not so sure about the sulphates or density.
+
+Some bivariate analysis should help.
+
+# Bivariate Analysis
+Before we start plotting, it is worth discussing again the objective of this exploration.  We are investigating if there is any relationship between the quality of the wine and its physiochemical properties.
+
+In the following matrix, I have plotted each factor against quality.
+
+```{r, echo=FALSE, scatter_matrix}
+qwine <- melt(wine, id.vars = 'quality')
+
+wine_stats <- qwine %>%
+  group_by(variable) %>%
+  summarise(mean = mean(value), std.dev = sd(value))
+
+qwine <- qwine %>% 
+  inner_join(wine_stats, by = 'variable') %>%
+  subset(value <= mean + 3*std.dev, select = -c(mean, std.dev))
+
+ggplot(qwine, aes(y = quality, x = value)) +
+  geom_point(alpha = .1) +
+  facet_wrap(~variable, scales = 'free_x')
+
+```
+
+Immediately we see the banding which arises due to the nomincal nature of the quality scale.  In fact the quality scale is an _ordinal_ reponse variable and when dealing with such variables it is helpful to transform them to _logits_ which are given by $logit(\pi_i) = log(\pi_i/pi_0)$ where $\pi_i$ is the probablity of the response being in the $ith$ category. In our case we can deduce these from the frequency of wines classified in each integer category 0 through 10. $\pi_0$ is the probability of the reference category which is usually choosen as one of the extremes. Since in our case, there are no wines with a score less than 3, we shall choose this.
+
+```{r echo=FALSE}
+p <- count(wine, quality)
+p$pi <- p$n/sum(p$n)
+p$cum <- cumsum(p$n)
+p$odds.ratio <- p$cum/(p$cum[length(p$cum)] - p$cum)
+
+# p$pi <- p$n / sum(p$n)
+# p$logit <- log(p$pi / p$pi[p$quality == 3])
+# #wine$quality.logit <- p$logit[match(wine$quality, p$quality)]
+wine <- inner_join(wine, p, by = 'quality')
+wine <- subset(wine, select = -c(pi, cum, n))
+
+#ggplot(wine, aes(quality.logit)) + geom_histogram()
+
+```
+
+```{r, echo=FALSE, scatter_matrix}
+qwine <- melt(wine, id.vars = c('quality', 'odds.ratio'))
+
+# wine_stats <- qwine %>%
+#   group_by(variable) %>%
+#   summarise(mean = mean(value), std.dev = sd(value))
+# 
+# qwine <- qwine %>% 
+#   inner_join(wine_stats, by = 'variable') %>%
+#   subset(value <= mean + 3*std.dev, select = -c(mean, std.dev))
+
+ggplot(subset(qwine, quality < 9), aes(y = log(odds.ratio), x = value)) +
+  geom_jitter(alpha = .1, height = 2) +
+  geom_smooth(method = 'lm') +
+  facet_wrap(~variable, scales = 'free_x')
+
+```
+
+
+I'll start with a ggpairs plot to see all the bivariate relationships.
+
+```{r echo=FALSE, eval=FALSE}
+curr_theme = theme_get()
+theme_set(theme_minimal())
+ggpairs(wine,
+        lower = list(continuous = wrap("points", shape = I('.'), 
+                                       alpha = 0.5)),
+        upper = list(combo = wrap("box", outlier.shape = I('.'))),
+        axisLabels = 'internal')
+
+theme_set(curr_theme)
+```
+
+Probably what surprised me most here was the relatively low amount of correlation between a number of the factors.  Even the acids and pH didn't have strong linear relationships which I was expecting.  In fact only density and alcohol seemed to have any correlation with other factors. For this reason, I should be careful when including them in any models later on.
+
+This plot also was not very useful in identifying any relationships between the pysiochemical properties and quality.  This is largely due to the discrete and small scale quality has.  A matix of scatterplots of each of the factors against quality may serve us better. Here I've removed the outliers again (3 std devs from mean).
+
+
+It's very difficult to see the relationships because of the discreteness of the quality scale, I'll add a large jitter to blend these gaps and also add a trend line.
+
+```{r, echo=FALSE}
+ggplot(qwine, aes(y = quality, x = value)) +
+  geom_jitter(alpha = .1, height = 2) +
+  geom_smooth(method = 'lm') +
+  facet_wrap(~variable, scales = 'free_x')
+```
+
+Yes! Now we can see that the strongest relationships are:
+
+1. Alcohol
+2. Chlorides
+3. Density
+4. Total sulfur dioxide
+5. Volatile Acidity (or pH?)
+
+We've already mentioned that density seems to be correlated with some of the other factors, but looking at this list and the ggpairs plot again we see alcohol is moderately correlated with a number of the other factors of interest. Hence when we look at some multivariate analysis, we should choose carefully.
+
+A few relationships I know to exist:
+
+1. Alcohol is less dense than water, so it is not suprising these two factors have a strong relationship.
+2. Alcohol is basically produced by a chemical reaction with sugar. So as more sugar is converted to alcohol we should see a more alcoholic wine.  This is supported in the data.
+
+# Multivariate Plots Section
+### Quality, Chlorides, Alcohol
+First I'm going to try plotting alcohol and chlorides against quality as they are two of the stronger relationships.  I'll bucket alcohol.
+
+```{r echo=FALSE, fig.height=2, fig.width=7}
+wine$alcohol.bucket <- cut(wine$alcohol, breaks=c(8, 10, 12, 15), include.lowest = TRUE)
+
+ggplot(subset(wine, chlorides <= mean(wine$chlorides) + 3*sd(wine$chlorides)), 
+       aes(y = quality, x = chlorides)) +
+  geom_jitter(alpha = 0.2, height = 2) +
+  facet_grid(~alcohol.bucket) +
+  theme(aspect.ratio=3/4) +
+  geom_smooth(method = 'lm')
+```
+
+We can clearly see that quality increases with alcohol, but the relationship with chloride is not as visible.  Instead I'll try bucketing it.
+
+```{r echo=FALSE, fig.height=2, fig.width=7}
+wine$chlorides.bucket <- cut(wine$chlorides, breaks = quantile(wine$chlorides, seq(0, 1, 0.25)), right = TRUE, include.lowest = TRUE)
+
+ggplot(wine, 
+       aes(y = quality, x = alcohol)) +
+  geom_jitter(alpha = 0.2, height = 2) +
+  facet_grid(~chlorides.bucket) +
+  theme(aspect.ratio=3/4) +
+  geom_smooth(method = 'lm')
+```
+
+This is better. We can see that quality seems to reduce as chlorides increase from bucket to bucket and within each tile, we can still see the relationship with alcohol. I might try this now by adding rows with the next 'most influential' factor, volatile acidity.
+
+### Quality, Alcohol, Chlorides, Volatile Acidity
+
+```{r echo=FALSE}
+wine$chlorides.bucket <- cut(wine$chlorides, breaks = quantile(wine$chlorides, seq(0, 1, 0.25)), right = TRUE, include.lowest = TRUE)
+
+wine$volatile.acidity.bucket <- cut(wine$volatile.acidity, breaks = quantile(wine$volatile.acidity, seq(0, 1, 0.25)), include.lowest = TRUE)
+
+ggplot(wine, aes(y = quality, x = alcohol, color = quality)) +
+  geom_jitter(height = 2) +
+  geom_smooth(method = 'lm', color = 'black', size = .5) +
+  facet_grid(volatile.acidity.bucket~chlorides.bucket, labeller = label_both) +
+  scale_color_gradient(low = 'red', high = 'blue') +
+  theme(strip.text = element_text(size = 6))
+
+# scale_color_gradient2(low = 'red', mid = 'white', high = 'blue', midpoint = 6)
+```
+
+This is not bad!  We can see a few interesting phenomonen here.
+
+- It looks like a good recipe for high quality wine is low chlorides, high acidity and high alcohol. Seen at the top of the fitted line in the bottom left grid tile.
+- However,  it seems for the most consistenly good wines regardless of alcohol, low chlorides and low acidity is best (top left tile)
+- In each cohort increased alcohol improves the quality except the top right corner which corresponds to the highest chlorides and lowest acidity. This could perhaps indicate that if you're in the market for a less alcoholic wine, a salty but not acidic one is the best choice.
+- Finally, steer clear of high chloride, acidity wines regardless of alcohol (bottom right tile)
+
+I like having alcohol in these because that is the one thing you can get a quantitative measure of when you buy wine. The alcohol content is on the bottle.  The acidity, sweetness and saltiness are usually mentione in qualitative terms.
+
+Another way we might look at this is with box plots rather than scatter plots:
+
+```{r echo=FALSE}
+ggplot(wine, aes(y = quality, x = alcohol.bucket)) +
+  geom_boxplot(outlier.colour = "red", outlier.shape = 1) +
+  facet_grid(volatile.acidity.bucket~chlorides.bucket, labeller = label_both) +
+  theme(strip.text = element_text(size = 8))
+```
+
+Comments: ???
+
+Taking a step back, I'd like to look at sulfur and alcohol.
+
+```{r echo=FALSE, fig.height=2, fig.width=7}
+wine$total.sulfur.dioxide.bucket <- cut(wine$total.sulfur.dioxide, breaks = quantile(wine$total.sulfur.dioxide, seq(0, 1, 0.25)), include.lowest = TRUE)
+
+ggplot(wine,
+       aes(y = quality, x = alcohol)) +
+  geom_jitter(alpha = 0.2, height = 2) +
+  facet_grid(~total.sulfur.dioxide.bucket) +
+  theme(aspect.ratio=4/3) +
+  geom_smooth(method = 'lm')
+```
+
+The effect of total sulfur dioxide here is harder to see. In fact to the eye it may see them the 2nd tile has slightly better quality then the first.
+
+### Quality, Alcohol, Chlorides, Total Sulfur Dioxide
+```{r echo=FALSE}
+ggplot(wine, aes(y = quality, x = alcohol, color = quality)) +
+  geom_jitter(height = 2) +
+  geom_smooth(method = 'lm', color = 'black', size = .5) +
+  facet_grid(total.sulfur.dioxide.bucket~chlorides.bucket, labeller = label_both) +
+  scale_color_gradient(low = 'red', high = 'blue') +
+  theme(strip.text = element_text(size = 8))
+```
+
+We see a similar relationship across all cohorts with alcohol here.  Generally the more the better.
+- It also seems lower chloride, and sulful dioxide makes for better wine.
+- But if it is a "salty" wine, then higher sulfur.dioxide and low alcohol may help.
+
+# Models
+I'll run some models including the factors we like.
+
+### Models with alcohol
+```{r, echo=FALSE, remove_outliers}
+wine_clean <- dplyr::select(wine, -ends_with('bucket'))
+vars = names(wine_clean)[-12]
+for (v in vars) {
+  iStats <- subset(wine_stats, variable == v)
+  wine_clean <- wine_clean[wine_clean[v] <= iStats$mean + 3*iStats$std.dev, ]
+}
+```
+
+```{r echo=FALSE, alcohol_models}
+m1 <- lm(quality ~ alcohol, wine_clean)
+m2 <- update(m1, ~ . + chlorides)
+m3 <- update(m2, ~ . + volatile.acidity)
+m4 <- update(m3, ~ . + total.sulfur.dioxide)
+
+mtable(m1, m2, m3, m4)
+```
+
+Let's check out the residuals vs fitted for this last model:
+
+```{r echo=FALSE}
+model = data.frame()
+for (m in list(m1, m2, m3, m4)) {
+  print(class(m))
+  model <- bind_rows(model, data.frame(formula = deparse(formula(m)), residuals = residuals(m), predicted = predict(m)))
+}
+  
+ggplot(model, aes(x = predicted, y = residuals)) +
+  geom_point(color = 'red', shape = 1, size = 3) +
+  geom_hline(yintercept = 0) +
+  geom_smooth() +
+  facet_wrap(~formula)
+```
+
+The obvious banding is due again to the discrete nature of quality, but apart from that I think 
+
+```{r echo=FALSE, density_models}
+m1 <- lm(quality ~ density, wine_clean)
+m2 <- update(m1, ~ . + chlorides)
+m3 <- update(m2, ~ . + volatile.acidity)
+m4 <- update(m3, ~ . + total.sulfur.dioxide)
+
+mtable(m1, m2, m3, m4)
+```
+
+```{r echo=FALSE}
+model = data.frame()
+for (m in list(m1, m2, m3, m4)) {
+  print(class(m))
+  model <- bind_rows(model, data.frame(formula = deparse(formula(m)), residuals = residuals(m), predicted = predict(m)))
+}
+
+ggplot(model, aes(x = predicted, y = residuals)) +
+  geom_point(color = 'red', shape = 1, size = 3) +
+  geom_hline(yintercept = 0) +
+  geom_smooth() +
+  facet_wrap(~formula)
+```
+
+```{r echo=FALSE, ordinal_logistic_regression}
+wine$quality <- factor(wine$quality)
+m <- polr(quality ~ alcohol + chlorides + volatile.acidity + total.sulfur.dioxide, data = wine, Hess=TRUE)
+ctable <- coef(summary(m))
+p_values <- pnorm(abs(ctable[, "t value"]), lower.tail = FALSE) * 2
+ctable <- cbind(ctable, "p value" = p_values)
+ci <- confint(m)
+```
+
+# Multivariate Analysis
+
+### Talk about some of the relationships you observed in this part of the investigation. Were there features that strengthened each other in terms of looking at your feature(s) of interest?
+
+### Were there any interesting or surprising interactions between features?
+
+### OPTIONAL: Did you create any models with your dataset? Discuss the strengths and limitations of your model.
+
+------
+
+# Final Plots and Summary
+
+### Plot One
+```{r echo=FALSE, Plot_One}
+
+```
+
+### Description One
+
+
+### Plot Two
+```{r echo=FALSE, Plot_Two}
+
+```
+
+### Description Two
+
+
+### Plot Three
+```{r echo=FALSE, Plot_Three}
+
+```
+
+### Description Three
+
+------
+
+# Reflection
+Talk about small multiples (a Tufte principle) really becoming aparent as the easiest way for me to see and relationships. But while it helped to have them side by side, the differing amounts of data points in each cohort had an effect on my thinking and I had to remind myself density in a tile did not correspond to better quality.  Perhaps sampling from each cohort for a uniform count would have helped.
+
+# References
+1. http://www.inside-r.org/packages/cran/GGally/docs/ggpairs
+2. http://docs.ggplot2.org/current/geom_jitter.html
+3. http://docs.ggplot2.org/0.9.3.1/scale_gradient.html
+4. http://docs.ggplot2.org/0.9.3.1/facet_grid.html
+5. http://seananderson.ca/2013/10/19/reshape.html
+6. http://www.rdocumentation.org/packages/dplyr/functions/summarise_each
+7. http://docs.ggplot2.org/current/geom_boxplot.html
+8. http://docs.ggplot2.org/dev/vignettes/themes.html
+9. http://stackoverflow.com/questions/14671172/how-to-convert-r-formula-to-text

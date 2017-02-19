@@ -1,0 +1,82 @@
+---
+title: "Project 1 - Test a Perceptual Phenomenon"
+author: "Cameron Roberts"
+output: 
+  html_document:
+    theme: readable
+    fig_width: 4
+    fig_height: 4
+    fig_caption: true
+---
+
+## Question 1
+The independent variable is the congruency of the words.  It has two levels: congruent, where the colour of the text matches the word and, incongruent, where the colour of the text does not match the word.
+
+The dependant variable is the length of time in seconds it takes a participant to read the colour of the text of each word aloud.
+
+## Question 2
+The null hypothesis is that the population mean of the time taken to read the incongruent words is equal to the population mean of the time taken to read the congruent words.  Our alternative hypothesis is that the population mean of the time taken to read the incongruent words is *greater* than the population mean of the time taken to read the congruent words. ie.
+
+$$ 
+H_0: \mu_i = \mu_c\\
+H_1: \mu_i > \mu_c
+$$
+
+We will perform a one-tailed paired samples *t*-test.  It is one tailed because we want to test if $\mu_i > \mu_c$ (not simply if $\mu_i \neq \mu_c$).  It is a paired test because each subject performed both tasks and we are able to determine how their result was affected.
+
+## Question 3
+Some statistics for the dataset are given in the following table.  The statistics are presented for the two task types and also the difference between task times for each subject. It is the statistics for the difference that we directly use in our hypothesis test.
+
+```{r, echo=FALSE, message=FALSE, results='asis'}
+source("stroopLoad.R")
+
+stats <- aggregate(stroopLongWithDiff["Elapsed"], stroopLongWithDiff["Task"], mean) %>% data.frame()
+sMedian <- aggregate(stroopLongWithDiff["Elapsed"], stroopLongWithDiff["Task"], median) %>% data.frame()
+sStdDev <- aggregate(stroopLongWithDiff["Elapsed"], stroopLongWithDiff["Task"], sd) %>% data.frame()
+sCount <- aggregate(stroopLongWithDiff["Elapsed"], stroopLongWithDiff["Task"], length) %>% data.frame()
+stats$Median <- sMedian$Elapsed
+stats$Std.Dev <- sStdDev$Elapsed
+stats$Count <- sCount$Elapsed
+colnames(stats)[2] <- "Mean"
+testStats <- stats[stats$Task=="Difference",2:5]
+
+kable(stats, digits=4, caption="Table 1. Descriptive statistics for the Stroop dataset.")
+```
+
+## Question 4
+Below are two plots which show the distribution of the experiment data in different ways. However, in both we can see recurring themes which add some initial support to our alternative hypothesis that the time taken to read the incongruent words is longer.
+
+The first, a boxplot, shows that the median and inner quartile ranges of the incongruent task are greater than the congruent.  It also suggests there are two outlying points in the data. (We will not exclude these from our analysis).  This plot does not allow us to see any relationship between the *pairs* of observations, only the task groups as a whole.
+
+The second plot, shows the paired relationships by ploting the times for the two tasks against each other.  We can clearly see that the time taken for the incongruent task increased for all subjects because all points are above the identity line.
+
+```{r, echo=FALSE, fig.cap=c("Fig 1. Box plot of task length.", "Fig 2. Scatter plot of task length.")}
+ggplot(data=stroopLong, aes(x=Task, y=Elapsed, fill=Task)) +
+  geom_boxplot() +
+  theme(aspect.ratio=1) + 
+  guides(fill=FALSE) + 
+  ylab("Time (sec)") +
+  theme(panel.grid.minor.x=element_blank(), panel.grid.major.x=element_blank()) +
+  theme(text=element_text(family="Georgia"))
+
+axisLimits <- c(min(stroopLong$Elapsed), max(stroopLong$Elapsed))
+ggplot(data=stroop, aes(Congruent, Incongruent)) +
+  scale_x_continuous(limit=axisLimits, name="Congruent Time (sec)") +
+  scale_y_continuous(limit=axisLimits, name="Incongruent Time (sec)") +
+  coord_fixed() +
+  geom_point() +
+  geom_rug(col=rgb(.5,0,0,alpha=.5)) +
+  geom_abline(colour="blue", linetype="dashed") +
+  theme(text=element_text(family="Georgia"))
+```
+
+## Question 5
+Our *t*-statistic for the hypothesis test is $t(23) = `r round(testStats$Mean/(testStats$Std.Dev/sqrt(testStats$Count)), 4)`$. The critical value for a confidence level of $95\%$ $(\alpha=0.05)$ is $t_{crit} = `r round(qt(.95, testStats$Count-1), 4)`$ hence we reject the null hypothesis with $p<.001$. This means there is significant evidence to suggest that the length of time taken to read incongruent words is greater than that of congruent words. This result aligns with our expectations both in terms of reasoning and the information presented in the previous plots.
+
+## Question 6
+There are several theories on why the Stroop effect occurs.  The most common is the *automaticity* theory.  This theory suggests that reading words is an "automatic process" for the brain while recognizing colours is not.  Reading the words does not require controlled attention but still consumes sufficient resources to reduce the amount available for colour processing. ([Source: Wikipedia - Stroop Effect][1])
+
+A variation on this experiment is the numerical Stroop effect.  In this experiment, rather than colours and words, the relationship between numbers and size is examined.  In the experiment participants are asked to say the larger (in text size) of two numbers.  In the congruent task, the number and size agree eg. $5$ $_3$.  Whereas in the incongruent task the number and size disagree eg. $_5$ $3$. ([Source: Wikipedia - Numerical Stroop Effect][2])
+
+[1]: https://en.wikipedia.org/wiki/Stroop_effect#Automaticity "Stroop Effect"
+[2]: https://en.wikipedia.org/wiki/Numerical_Stroop_effect
